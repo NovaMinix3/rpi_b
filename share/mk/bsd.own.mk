@@ -1079,7 +1079,7 @@ MKCOMPATMODULES:=	no
 #
 .if ${MACHINE_ARCH} == "mips64eb" || ${MACHINE_ARCH} == "mips64el" || \
     (${MACHINE_CPU} == "arm" && ${MACHINE_ARCH:M*hf*} == "") || \
-    ${MACHINE_ARCH} == "coldfire" || \
+    ${MACHINE_ARCH} == "coldfire" || ${MACHINE_ARCH} == "earmv6hf" || \
     ${MACHINE} == "emips"
 MKSOFTFLOAT?=	yes
 .endif

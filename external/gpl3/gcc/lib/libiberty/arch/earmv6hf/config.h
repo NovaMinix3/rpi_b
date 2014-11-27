@@ -274,7 +274,7 @@
 #define HAVE_SYSCONF 1
 
 /* Define to 1 if you have the `sysctl' function. */
-#define HAVE_SYSCTL 1
+/* #undef HAVE_SYSCTL */
 
 /* Define to 1 if you have the `sysmp' function. */
 /* #undef HAVE_SYSMP */
@@ -370,10 +370,10 @@
 #define HAVE_VSPRINTF 1
 
 /* Define to 1 if you have the `wait3' function. */
-#define HAVE_WAIT3 1
+/* #undef HAVE_WAIT3 */
 
 /* Define to 1 if you have the `wait4' function. */
-#define HAVE_WAIT4 1
+/* #undef HAVE_WAIT4 */
 
 /* Define to 1 if you have the `waitpid' function. */
 #define HAVE_WAITPID 1

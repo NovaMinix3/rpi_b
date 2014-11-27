@@ -269,7 +269,7 @@ PAM_STATIC_LDADD=
 PAM_STATIC_DPADD=
 .endif
 
-.if defined(__MINIX) && ${MACHINE_ARCH} == "earm"
+.if defined(__MINIX) && ( (${MACHINE_ARCH} == "earm") || (${MACHINE_ARCH} == "earmv6hf") )
 # LSC: On ARM, when compiling statically, with gcc, lgcc_eh is required
 LDFLAGS+= ${${ACTIVE_CC} == "gcc":? -lgcc_eh:}
 .endif # defined(__MINIX) && ${MACHINE_ARCH} == "earm"

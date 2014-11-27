@@ -2,7 +2,7 @@
 PROG=	mmc
 SRCS=	mmcblk.c mmchost_dummy.c sdhcreg.h sdmmcreg.h
 
-.if ${MACHINE_ARCH} == "earm"
+.if ( (${MACHINE_ARCH} == "earm") || (${MACHINE_ARCH} == "earmv6hf") )
 SRCS += mmchost_mmchs.c 
 .endif
 

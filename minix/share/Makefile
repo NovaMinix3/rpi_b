@@ -2,6 +2,9 @@
 
 .if ${MACHINE_ARCH} == "earm"
 SUBDIR+=	beaglebone
-.endif # ${MACHINE_ARCH} == "earm"
+.endif
+.if ${MACHINE_ARCH} == "earmv6hf"
+SUBDIR+=	rpi
+.endif # ${MACHINE_ARCH} == "earmv6hf"
 
 .include <bsd.subdir.mk>

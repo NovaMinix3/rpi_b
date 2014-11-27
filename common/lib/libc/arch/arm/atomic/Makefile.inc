@@ -9,7 +9,6 @@ ARMV7+= ${CPPFLAGS:M-march=armv7*:} ${CPPFLAGS:M-mcpu=cortex*}
 .if empty(CFLAGS:M-march=*) && empty(CFLAGS:M-mcpu=*) \
     && empty(CPPFLAGS:M-march=*) && empty(CPPFLAGS:M-mcpu=*) \
     && empty(CPUFLAGS:M-march=*) && empty(CPUFLAGS:M-mcpu=*)
-ARMV6+= ${MACHINE_ARCH:Mearmv6*}
 ARMV7+= ${MACHINE_ARCH:Mearmv7*}
 .endif
 

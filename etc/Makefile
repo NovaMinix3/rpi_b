@@ -445,7 +445,7 @@ install-etc-files-safe: .PHONY .MAKE check_DESTDIR MAKEDEV
 	fi; \
 	${INSTALL_FILE} -o ${owner} -g ${group} -m ${mode} ${sdir}${files} ${tdir};
 .endfor
-.if ${MACHINE_ARCH} == "earm"
+.if ((${MACHINE_ARCH} == "earm") || (${MACHINE_ARCH} == "earmv6hf"))
 	${_MKMSG_INSTALL} ${DESTDIR}/etc/rc.capes
 	${INSTALL_DIR} ${DESTDIR}/etc/rc.capes
 	${INSTALL_FILE} -m ${BINMODE} -o ${BINOWN} -g ${BINGRP} ${NETBSDSRCDIR}/etc/rc.capes/* ${DESTDIR}/etc/rc.capes

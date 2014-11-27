@@ -67,7 +67,7 @@ SUBDIR+=	../minix/lib/libhgfs \
 		../minix/lib/libvirtio
 .endif
 
-.if (${MACHINE_ARCH} == "earm")
+.if ( (${MACHINE_ARCH} == "earm") || (${MACHINE_ARCH} == "earmv6hf") )
 SUBDIR+=	../minix/lib/libclkconf \
 		../minix/lib/libgpio \
 		../minix/lib/libi2cdriver
@@ -97,7 +97,7 @@ SUBDIR+=	\
 
 .if (${MACHINE_CPU} == "arm")
 LIBC_MACHINE_ARCH?=${MACHINE_ARCH}
-.if empty(LIBC_MACHINE_ARCH:M*hf*)
+.if ( (empty(LIBC_MACHINE_ARCH:M*hf*) ) || (${MACHINE_ARCH} == "earmv6hf"))
 SUBDIR+=	libc_vfp
 .endif
 .endif

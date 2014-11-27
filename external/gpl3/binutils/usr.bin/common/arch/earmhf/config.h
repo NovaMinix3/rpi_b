@@ -25,13 +25,13 @@
 
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
-#define ENABLE_NLS 1
+/* #undef ENABLE_NLS */
 
 /* Suffix used for executables, if any. */
 #define EXECUTABLE_SUFFIX ""
 
 /* Define to 1 if you have `alloca', as a function or macro. */
-#define HAVE_ALLOCA 1
+/* #undef HAVE_ALLOCA */
 
 /* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
    */
@@ -97,17 +97,8 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
-/* Define if your <locale.h> file defines LC_MESSAGES. */
-#define HAVE_LC_MESSAGES 1
-
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
-
-/* Define to 1 if you have the <locale.h> header file. */
-#define HAVE_LOCALE_H 1
-
-/* Define if mbstate_t exists in wchar.h. */
-#define HAVE_MBSTATE_T 1
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -120,9 +111,6 @@
 
 /* Define to 1 if you have the `sbrk' function. */
 #define HAVE_SBRK 1
-
-/* Define to 1 if you have the `setlocale' function. */
-#define HAVE_SETLOCALE 1
 
 /* Define to 1 if you have the `setmode' function. */
 #define HAVE_SETMODE 1
@@ -167,10 +155,7 @@
 #define HAVE_UNISTD_H 1
 
 /* Define to 1 if you have the `utimes' function. */
-#define HAVE_UTIMES 1
-
-/* Define to 1 if you have the <wchar.h> header file. */
-#define HAVE_WCHAR_H 1
+/* #undef HAVE_UTIMES */
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #define HAVE_ZLIB_H 1
@@ -218,7 +203,7 @@
 #define STRING_WITH_STRINGS 1
 
 /* Configured target name. */
-#define TARGET "arm--netbsdelf-eabihf"
+#define TARGET "arm-elf32-minix"
 
 /* Define to 1 if user symbol names have a leading underscore, 0 if not. */
 #define TARGET_PREPENDS_UNDERSCORE 0
@@ -262,11 +247,11 @@
 /* #undef _LARGE_FILES */
 
 /* Define to 1 if on MINIX. */
-/* #undef _MINIX */
+#define _MINIX 1
 
 /* Define to 2 if the system does not provide POSIX.1 features except with
    this defined. */
-/* #undef _POSIX_1_SOURCE */
+#define _POSIX_1_SOURCE 
 
 /* Define to 1 if you need to in order for `stat' and other things to work. */
-/* #undef _POSIX_SOURCE */
+#define _POSIX_SOURCE 1

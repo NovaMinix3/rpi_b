@@ -127,7 +127,7 @@
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 #ifndef USED_FOR_TARGET
-#define ENABLE_NLS 1
+/* #undef ENABLE_NLS */
 #endif
 
 
@@ -504,7 +504,7 @@
 
 /* Define 0/1 if your assembler and linker support COMDAT groups. */
 #ifndef USED_FOR_TARGET
-#define HAVE_COMDAT_GROUP 1
+#define HAVE_COMDAT_GROUP 0
 #endif
 
 
@@ -759,14 +759,14 @@
 /* Define to 1 if we found a declaration for 'setrlimit', otherwise define to
    0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_SETRLIMIT 1
+#define HAVE_DECL_SETRLIMIT 0
 #endif
 
 
 /* Define to 1 if we found a declaration for 'sigaltstack', otherwise define
    to 0. */
 #ifndef USED_FOR_TARGET
-#define HAVE_DECL_SIGALTSTACK 1
+#define HAVE_DECL_SIGALTSTACK 0
 #endif
 
 
@@ -1093,7 +1093,7 @@
 
 /* Define .init_array/.fini_array sections are available and working. */
 #ifndef USED_FOR_TARGET
-/* #undef HAVE_INITFINI_ARRAY */
+#define HAVE_INITFINI_ARRAY 1
 #endif
 
 
@@ -1267,7 +1267,7 @@
 
 /* Define to 1 if you have the `mincore' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_MINCORE 1
+/* #undef HAVE_MINCORE */
 #endif
 
 
@@ -1321,7 +1321,7 @@
 
 /* Define to 1 if you have the `setrlimit' function. */
 #ifndef USED_FOR_TARGET
-#define HAVE_SETRLIMIT 1
+/* #undef HAVE_SETRLIMIT */
 #endif
 
 
@@ -1753,7 +1753,7 @@
 
 /* Define to 1 if on MINIX. */
 #ifndef USED_FOR_TARGET
-/* #undef _MINIX */
+#define _MINIX 1
 #endif
 
 

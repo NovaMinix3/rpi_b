@@ -39,7 +39,7 @@ SUBDIR+=	libvboxfs
 SUBDIR+=	libvirtio
 .endif
 
-.if (${MACHINE_ARCH} == "earm")
+.if ((${MACHINE_ARCH} == "earm") || (${MACHINE_ARCH} == "earmv6hf") )
 SUBDIR+=	libclkconf
 SUBDIR+=	libgpio
 SUBDIR+=	libi2cdriver

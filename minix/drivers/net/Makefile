@@ -14,7 +14,7 @@ SUBDIR+=	rtl8169
 SUBDIR+=	virtio_net
 .endif # ${MACHINE_ARCH} == "i386"
 
-.if ${MACHINE_ARCH} == "earm"
+.if ( (${MACHINE_ARCH} == "earm") || (${MACHINE_ARCH} == "earmv6hf") )
 SUBDIR+=	lan8710a
 .endif # ${MACHINE_ARCH} == "earm"
 

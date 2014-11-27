@@ -24,7 +24,7 @@ LDADD+= -lminc
 DPADD+= ${LIBMINC}
 .endif # empty(${LDADD:M-lc})
 
-.if ${MACHINE_ARCH} == "earm"
+.if ((${MACHINE_ARCH} == "earm") || (${MACHINE_ARCH} == "earmv6hf"))
 
 # LSC: On ARM, when compiling statically, with gcc, lgcc_eh is required
 .if ${PROG:U} != "kernel" && !empty(CC:M*gcc)

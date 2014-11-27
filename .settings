@@ -1,0 +1,8 @@
+# raspberry-pi
+U_BOOT_BIN_DIR=build/rpi_b
+CONSOLE=tty02
+U_BOOT_SOURCE=git://git.denx.de/u-boot-arm
+U_BOOT_BRANCH=master
+U_BOOT_GIT_VERSION=85bafb6da4dddfffa78479aa49a72ae48578a4ce
+ARCH=evbearmv6hf-el
+#ARCH=evbearm-el

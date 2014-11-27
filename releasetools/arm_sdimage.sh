@@ -20,12 +20,23 @@ then
 fi
 
 : ${ARCH=evbearm-el}
+case $ARCH in
+evbearm-el)
+	ARM_TOOLS_PREFIX=arm-elf32-minix-
+;;
+evbearmv6hf-el)
+	ARM_TOOLS_PREFIX=armv6-elf32-minix-
+;;
+*)
+	ARM_TOOLS_PREFIX=
+;;
+esac
 : ${OBJ=../obj.${ARCH}}
 : ${CROSS_TOOLS=${OBJ}/"tooldir.`uname -s`-`uname -r`-`uname -m`"/bin}
-: ${CROSS_PREFIX=${CROSS_TOOLS}/arm-elf32-minix-}
+: ${CROSS_PREFIX=${CROSS_TOOLS}/${ARM_TOOLS_PREFIX}}
 : ${JOBS=1}
 : ${DESTDIR=${OBJ}/destdir.$ARCH}
-: ${RELEASETOOLSDIR=./releasetools/}
+: ${RELEASETOOLSDIR=./releasetools}
 : ${FSTAB=${DESTDIR}/etc/fstab}
 : ${BUILDVARS=-V MKGCCCMDS=yes -V MKLLVM=no}
 : ${BUILDSH=build.sh}
@@ -53,7 +64,9 @@ MODDIR=${DESTDIR}/boot/minix/.temp
 #
 # We host u-boot binaries.
 #
-U_BOOT_GIT_VERSION=cb5178f12787c690cb1c888d88733137e5a47b15
+: ${U_BOOT_SOURCE=git://git.minix3.org/u-boot}
+: ${U_BOOT_BRANCH=minix}
+: ${U_BOOT_GIT_VERSION=cb5178f12787c690cb1c888d88733137e5a47b15}
 
 #
 # All sized are written in 512 byte blocks
@@ -148,9 +161,9 @@ mkdir -p ${IMG_DIR}
 #
 # Download the stage 1 bootloader  and u-boot
 #
-${RELEASETOOLSDIR}/fetch_u-boot.sh -o ${RELEASETOOLSDIR}/u-boot -n $U_BOOT_GIT_VERSION
+${RELEASETOOLSDIR}/fetch_u-boot.sh -o ${RELEASETOOLSDIR}/u-boot -a $U_BOOT_SOURCE -b $U_BOOT_BRANCH -n $U_BOOT_GIT_VERSION -d $U_BOOT_BIN_DIR
 cp ${RELEASETOOLSDIR}/u-boot/${U_BOOT_BIN_DIR}/u-boot.img ${IMG_DIR}/
-cp ${RELEASETOOLSDIR}/u-boot/${U_BOOT_BIN_DIR}/MLO ${IMG_DIR}/
+#cp ${RELEASETOOLSDIR}/u-boot/${U_BOOT_BIN_DIR}/MLO ${IMG_DIR}/
 
 if [ ${CREATE_IMAGE_ONLY} -eq 0 ]
 then
@@ -235,7 +248,7 @@ ${MKFS_VFAT_CMD} ${MKFS_VFAT_OPTS} ${IMG_DIR}/fat.img
 ${RELEASETOOLSDIR}/gen_uEnv.txt.sh -c ${CONSOLE}  > ${IMG_DIR}/uEnv.txt
 
 echo "Copying configuration kernel and boot modules"
-mcopy -bsp -i ${IMG_DIR}/fat.img  ${IMG_DIR}/$MLO ::MLO
+#mcopy -bsp -i ${IMG_DIR}/fat.img  ${IMG_DIR}/$MLO ::MLO
 mcopy -bsp -i ${IMG_DIR}/fat.img ${IMG_DIR}/$UBOOT ::u-boot.img
 mcopy -bsp -i ${IMG_DIR}/fat.img ${IMG_DIR}/uEnv.txt ::uEnv.txt
 

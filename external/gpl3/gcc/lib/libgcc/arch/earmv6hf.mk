@@ -2,7 +2,6 @@
 # Generated from: 	NetBSD: mknative-gcc,v 1.71 2013/06/28 08:30:10 mrg Exp 
 # Generated from: NetBSD: mknative.common,v 1.9 2007/02/05 18:26:01 apb Exp 
 #
-nbgmake[1]: Entering directory `/u2/netbsd-HEAD/evbearmv6hf-el/obj/tools/gcc'
 G_INCLUDES=-I. -I. -I${GNUHOSTDIST}/gcc -I${GNUHOSTDIST}/gcc/. -I${GNUHOSTDIST}/gcc/../include -I./../intl -I${GNUHOSTDIST}/gcc/../libcpp/include     -I${GNUHOSTDIST}/gcc/../libdecnumber -I${GNUHOSTDIST}/gcc/../libdecnumber/dpd -I../libdecnumber   
 G_LIB2ADD=${GNUHOSTDIST}/gcc/config/arm/unaligned-funcs.c
 G_LIB2ADDEH=${GNUHOSTDIST}/gcc/config/arm/unwind-arm.c ${GNUHOSTDIST}/gcc/config/arm/libunwind.S ${GNUHOSTDIST}/gcc/config/arm/pr-support.c ${GNUHOSTDIST}/gcc/unwind-c.c
@@ -19,8 +18,8 @@ G_SHLIB_MAPFILES=${GNUHOSTDIST}/gcc/libgcc-std.ver ${GNUHOSTDIST}/gcc/config/arm
 G_SHLIB_NM_FLAGS=-pg
 G_EXTRA_HEADERS=${GNUHOSTDIST}/gcc/config/arm/mmintrin.h ${GNUHOSTDIST}/gcc/config/arm/arm_neon.h ${GNUHOSTDIST}/gcc/ginclude/tgmath.h
 G_xm_defines=
-G_tm_defines=NETBSD_ENABLE_PTHREADS TARGET_DEFAULT_FLOAT_ABI=ARM_FLOAT_ABI_HARD
+G_tm_defines=
 G_COLLECT2=collect2
 G_UNWIND_H=${GNUHOSTDIST}/gcc/config/arm/unwind-arm.h
 G_xm_include_list=auto-host.h ansidecl.h
-nbgmake[1]: Leaving directory `/u2/netbsd-HEAD/evbearmv6hf-el/obj/tools/gcc'
+

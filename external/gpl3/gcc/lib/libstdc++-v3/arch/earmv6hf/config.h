@@ -163,7 +163,7 @@
 
 /* Define if gthr-default.h exists (meaning that threading support is
    enabled). */
-#define HAVE_GTHR_DEFAULT 1
+/* #undef HAVE_GTHR_DEFAULT */
 
 /* Define to 1 if you have the `hypot' function. */
 /* #undef HAVE_HYPOT */
@@ -283,7 +283,7 @@
 /* #undef HAVE_NAN_H */
 
 /* Define if poll is available in <poll.h>. */
-#define HAVE_POLL 1
+/* #undef HAVE_POLL */
 
 /* Define to 1 if you have the `powf' function. */
 /* #undef HAVE_POWF */
@@ -394,7 +394,7 @@
 /* #undef HAVE_S_IFREG */
 
 /* Define if S_IFREG is available in <sys/stat.h>. */
-#define HAVE_S_ISREG 1
+/* #undef HAVE_S_ISREG */
 
 /* Define to 1 if you have the `tanf' function. */
 /* #undef HAVE_TANF */
@@ -436,7 +436,7 @@
 #define HAVE_WCTYPE_H 1
 
 /* Define if writev is available in <sys/uio.h>. */
-#define HAVE_WRITEV 1
+/* #undef HAVE_WRITEV */
 
 /* Define to 1 if you have the `_acosf' function. */
 /* #undef HAVE__ACOSF */
@@ -741,7 +741,7 @@
 /* Define if C99 functions in <complex.h> should be used in <tr1/complex>.
    Using compiler builtins for these functions requires corresponding C99
    library functions to be present. */
-#define _GLIBCXX_USE_C99_COMPLEX_TR1 1
+/* #undef _GLIBCXX_USE_C99_COMPLEX_TR1 */
 
 /* Define if C99 functions in <ctype.h> should be imported in <tr1/cctype> in
    namespace std::tr1. */
@@ -765,7 +765,7 @@
 
 /* Define if C99 functions or macros in <math.h> should be imported in
    <tr1/cmath> in namespace std::tr1. */
-#define _GLIBCXX_USE_C99_MATH_TR1 1
+/* #undef _GLIBCXX_USE_C99_MATH_TR1 */
 
 /* Define if C99 types in <stdint.h> should be imported in <tr1/cstdint> in
    namespace std::tr1. */

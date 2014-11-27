@@ -3,9 +3,9 @@
 /* Generated from: NetBSD: mknative.common,v 1.9 2007/02/05 18:26:01 apb Exp  */
 
 /* Generated automatically. */
-static const char configuration_arguments[] = "/u1/netbsd-HEAD/src/tools/gcc/../../external/gpl3/gcc/dist/configure --target=armv6--netbsdelf-eabihf --enable-long-long --enable-threads --with-bugurl=http://www.NetBSD.org/Misc/send-pr.html --with-pkgversion='NetBSD nb1 20120916' --with-system-zlib --enable-__cxa_atexit --with-mpc-lib=/u2/netbsd-HEAD/evbearmv6hf-el/obj/external/lgpl2/mpc/lib/libmpc --with-mpfr-lib=/u2/netbsd-HEAD/evbearmv6hf-el/obj/external/lgpl3/mpfr/lib/libmpfr --with-gmp-lib=/u2/netbsd-HEAD/evbearmv6hf-el/obj/external/lgpl3/gmp/lib/libgmp --with-mpc-include=/u1/netbsd-HEAD/src/external/lgpl2/mpc/dist/src --with-mpfr-include=/u1/netbsd-HEAD/src/external/lgpl3/mpfr/dist --with-gmp-include=/u1/netbsd-HEAD/src/external/lgpl3/gmp/lib/libgmp/arch/earmv6hf --enable-tls --disable-multilib --disable-symvers --disable-libstdcxx-pch --build=x86_64-unknown-netbsd6.1. --host=armv6--netbsdelf-eabihf";
-static const char thread_model[] = "posix";
+static const char configuration_arguments[] = "/usr/src/tools/gcc/../../external/gpl3/gcc/dist/configure --target=arm-elf32-minix --disable-libssp --disable-threads --enable-long-long --enable-threads --with-bugurl=http://www.NetBSD.org/Misc/send-pr.html --with-pkgversion='NetBSD nb1 20120916' --with-system-zlib --enable-__cxa_atexit --with-arch=armv7-a --with-mpfr=/usr/objs/evbearm-el/tooldir.Minix-3.2.1-i686 --with-gmp=/usr/objs/evbearm-el/tooldir.Minix-3.2.1-i686 --with-mpc=/usr/objs/evbearm-el/tooldir.Minix-3.2.1-i686 --disable-nls --disable-multilib --disable-symvers --disable-libstdcxx-pch --program-transform-name=s,^,arm-elf32-minix-, --enable-languages='c c++ objc' --prefix=/usr/objs/evbearm-el/tooldir.Minix-3.2.1-i686";
+static const char thread_model[] = "single";
 
 static const struct {
   const char *name, *value;
-} configure_default_options[] = { { "cpu", "arm1176jzf-s" } };
+} configure_default_options[] = {  { "arch", "arm1176jzf-s" } };

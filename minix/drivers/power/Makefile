@@ -4,7 +4,7 @@
 SUBDIR+=	acpi
 .endif # ${MACHINE_ARCH} == "i386"
 
-.if ${MACHINE_ARCH} == "earm"
+.if ( (${MACHINE_ARCH} == "earm") || (${MACHINE_ARCH} == "earmv6hf") )
 SUBDIR+=	tps65217
 SUBDIR+=	tps65950
 .endif # ${MACHINE_ARCH} == "earm"

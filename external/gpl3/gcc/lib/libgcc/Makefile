@@ -6,7 +6,7 @@ SUBDIR+=	libgcc
 
 .if defined(__MINIX) && ${MKGCCCMDS} == "yes"
 
-.if ${MKPIC} != "no" || ${MACHINE_ARCH} == "earm"
+.if ((${MKPIC} != "no") || (${MACHINE_ARCH} == "earm") || (${MACHINE_ARCH} == "earmv6hf"))
 SUBDIR+=	libgcc_eh
 .endif
 

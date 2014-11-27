@@ -49,10 +49,10 @@
 
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
-#define ENABLE_NLS 1
+/* #undef ENABLE_NLS */
 
 /* Define to 1 if you have `alloca', as a function or macro. */
-#define HAVE_ALLOCA 1
+/* #undef HAVE_ALLOCA */
 
 /* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
    */
@@ -102,14 +102,8 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
-/* Define if your <locale.h> file defines LC_MESSAGES. */
-#define HAVE_LC_MESSAGES 1
-
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
-
-/* Define to 1 if you have the <locale.h> header file. */
-#define HAVE_LOCALE_H 1
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -119,9 +113,6 @@
 
 /* Define to 1 if you have the `sbrk' function. */
 #define HAVE_SBRK 1
-
-/* Define to 1 if you have the `setlocale' function. */
-#define HAVE_SETLOCALE 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -268,19 +259,19 @@
 #define STRING_WITH_STRINGS 1
 
 /* Target alias. */
-#define TARGET_ALIAS "arm--netbsdelf-eabihf"
+#define TARGET_ALIAS "arm-elf32-minix"
 
 /* Define as 1 if big endian. */
 #define TARGET_BYTES_BIG_ENDIAN 0
 
 /* Canonical target. */
-#define TARGET_CANONICAL "arm--netbsdelf-eabihf"
+#define TARGET_CANONICAL "arm-elf32-minix"
 
 /* Target CPU. */
 #define TARGET_CPU "arm"
 
 /* Target OS. */
-#define TARGET_OS "netbsdelf-eabihf"
+#define TARGET_OS "minix"
 
 /* Define if default target is PowerPC Solaris. */
 /* #undef TARGET_SOLARIS_COMMENT */
@@ -289,7 +280,7 @@
 /* #undef TARGET_SYMBIAN */
 
 /* Target vendor. */
-#define TARGET_VENDOR ""
+#define TARGET_VENDOR "elf32"
 
 /* Use b modifier when opening binary files? */
 /* #undef USE_BINARY_FOPEN */
@@ -351,14 +342,14 @@
 /* #undef _LARGE_FILES */
 
 /* Define to 1 if on MINIX. */
-/* #undef _MINIX */
+#define _MINIX 1
 
 /* Define to 2 if the system does not provide POSIX.1 features except with
    this defined. */
-/* #undef _POSIX_1_SOURCE */
+#define _POSIX_1_SOURCE 2
 
 /* Define to 1 if you need to in order for `stat' and other things to work. */
-/* #undef _POSIX_SOURCE */
+#define _POSIX_SOURCE 1
 
 /* Define to `__inline__' or `__inline' if that's what the C compiler
    calls it, or to nothing if 'inline' is not supported under any name.  */

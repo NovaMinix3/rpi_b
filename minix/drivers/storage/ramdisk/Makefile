@@ -89,7 +89,7 @@ dir.acpi:=	minix/drivers/power/acpi
 .endif
 .endif # ${MACHINE_ARCH} == "i386"
 
-.if ${MACHINE_ARCH} == "earm"
+.if ( (${MACHINE_ARCH} == "earm") || (${MACHINE_ARCH} == "earmv6hf") )
 PROGRAMS+=		mmc
 dir.mmc:=	minix/drivers/storage/mmc
 .endif # ${MACHINE_ARCH} == "earm"

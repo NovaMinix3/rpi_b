@@ -5,7 +5,7 @@
 # -o output dir
 OUTPUT_DIR=""
 GIT_VERSION=""
-while getopts "o:n:?" c
+while getopts "o:a:b:n:d:?" c
 do
         case "$c" in
         \?)
@@ -15,8 +15,17 @@ do
         o)
                 OUTPUT_DIR=$OPTARG
 		;;
+        a)
+                GIT_SOURCE=$OPTARG
+		;;
+        b)
+                GIT_BRANCH=$OPTARG
+		;;
         n)
                 GIT_VERSION=$OPTARG
+		;;
+        d)
+                BIN_DIR=$OPTARG
 		;;
 	esac
 done
@@ -38,7 +47,7 @@ fi
 #
 if  [ ! -e "$OUTPUT_DIR" ]
 then
-	git clone git://git.minix3.org/u-boot -b minix $OUTPUT_DIR
+	git clone $GIT_SOURCE -b $GIT_BRANCH $OUTPUT_DIR
 fi
 
 (
@@ -54,4 +63,9 @@ fi
 		git fetch -v 
 		git checkout $GIT_VERSION
 	fi
+	make CROSS_COMPILE=arm-linux-gnueabi- rpi_b_defconfig all
+	rm -rf build
+	mkdir build
+	mkdir ./$BIN_DIR
+	cp u-boot.bin ./$BIN_DIR/u-boot.img
 )

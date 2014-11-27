@@ -5,7 +5,7 @@
 SUBDIR+=	ti1225
 .  endif # ${MACHINE_ARCH} == "i386"
 
-.  if ${MACHINE_ARCH} == "earm"
+.  if ((${MACHINE_ARCH} == "earm") || (${MACHINE_ARCH} == "earmv6hf") )
 SUBDIR+=	i2c
 .  endif # ${MACHINE_ARCH} == "earm"
 .endif # ${MKIMAGEONLY} == "no"
