@@ -51,7 +51,12 @@ then
 	cp ../files/minix.h gcc/config/
 	cp ../files/t-minix gcc/config/
 	cp ../files/minix-spec.h gcc/config/
-	cp ../files/arm-minix.h gcc/config/arm/minix.h
+	if [ "$MACHINE_ARCH" !=  "earmv6hf" ]
+	then
+	  cp ../files/arm-minix.h gcc/config/arm/minix.h
+	else
+	  cp ../files/rpi-minix.h gcc/config/arm/minix.h
+	fi
 	cp ../files/i386-minix.h gcc/config/i386/minix.h
 	cp ../files/gcov-minix-fs-wrapper.h gcc/ 
 fi

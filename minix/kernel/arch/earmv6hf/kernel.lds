@@ -1,8 +1,8 @@
 OUTPUT_ARCH("arm")
 ENTRY(__k_unpaged_MINIX)
 
-_kern_phys_base = 0x80200000;	/* phys 4MB aligned for convenient remapping */
-_kern_vir_base =  0xF0400000;	/* map kernel high for max. user vir space */
+_kern_phys_base = 0x00008000;
+_kern_vir_base = 0xc0008000;	/* map kernel high for max. user vir space */
 _kern_offset = (_kern_vir_base - _kern_phys_base);
 
 __k_unpaged__kern_offset = _kern_offset;

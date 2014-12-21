@@ -17,7 +17,7 @@
 #include "kernel/vm.h"
 #include "kernel/proto.h"
 #include "arch_proto.h"
-#include "omap_rtc.h"
+#include "rpi_rtc.h"
 
 #define RTC_SS_BASE 0x44e3e000
 #define RTC_SS_SIZE 0x1000

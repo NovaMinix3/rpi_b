@@ -26,7 +26,7 @@
 void
 halt_cpu(void)
 {
-	asm volatile("dsb");
+	asm volatile("mcr p15, 0, %0, c7, c10, 4" : : "r" (0) : "memory");
 	asm volatile("cpsie i");
 	asm volatile("wfi");
 	asm volatile("cpsid i");

@@ -31,7 +31,8 @@ multiboot_init:
 	ldr	sp, =load_stack_start	/* make usable stack */
 	mov	fp, #0
 	bl	_C_LABEL(pre_init)
-
+    b hang
+    /*b multiboot_init*/
 	/* Kernel is mapped high now and ready to go, with
 	 * the boot info pointer returned by pre_init in r0.
 	 * Set the highly mapped stack and initialize it.

@@ -11,22 +11,22 @@
 #include "kernel/proto.h"
 #include "arch_proto.h"
 
-#include "omap_serial.h"
+#include "rpi_serial.h"
 
-struct omap_serial
+struct rpi_serial
 {
 	vir_bytes base;
 	vir_bytes size;
 };
 
-static struct omap_serial omap_serial = {
+static struct rpi_serial rpi_serial = {
 	.base = 0,
 };
 
 static kern_phys_map serial_phys_map;
 
 /* 
- * In kernel serial for the omap. The serial driver like most other
+ * In kernel serial for the rpi. The serial driver like most other
  * drivers needs to be started early and even before the MMU is turned on.
  * We start by directly accessing the hardware memory address. Later on
  * a when the MMU is turned on we still use a 1:1 mapping for these addresses.
@@ -45,40 +45,32 @@ static kern_phys_map serial_phys_map;
 void
 bsp_ser_init()
 {
-	if (BOARD_IS_BBXM(machine.board_id)) {
-		omap_serial.base = OMAP3_DM37XX_DEBUG_UART_BASE;
-	} else if (BOARD_IS_BB(machine.board_id)) {
-		omap_serial.base = OMAP3_AM335X_DEBUG_UART_BASE;
-	}
-	omap_serial.size = 0x1000;	/* 4k */
+	/*if (BOARD_IS_RPI(machine.board_id)) 
+    {
+		rpi_serial.base = RPI_BCM2835_DEBUG_UART_BASE;
+	}*/
+    rpi_serial.base = RPI_BCM2835_DEBUG_UART_BASE;
+	rpi_serial.size = 0x1000;	/* 4k */
 
-	kern_phys_map_ptr(omap_serial.base, omap_serial.size,
+	kern_phys_map_ptr(rpi_serial.base, rpi_serial.size,
 	    VMMF_UNCACHED | VMMF_WRITE, &serial_phys_map,
-	    (vir_bytes) & omap_serial.base);
-	assert(omap_serial.base);
+	    (vir_bytes) & rpi_serial.base);
+	assert(rpi_serial.base);
 }
 
 void
 bsp_ser_putc(char c)
 {
 	int i;
-	assert(omap_serial.base);
+	assert(rpi_serial.base);
+    /* Wait until there is space in the FIFO */
 
 	/* Wait until FIFO's empty */
-	for (i = 0; i < 100000; i++) {
-		if (mmio_read(omap_serial.base + OMAP3_LSR) & OMAP3_LSR_THRE) {
-			break;
-		}
-	}
+    while ( mmio_read(rpi_serial.base + RPI_UART_FR) & RPI_UARTFR_TXFF );
 
 	/* Write character */
-	mmio_write(omap_serial.base + OMAP3_THR, c);
+	mmio_write(rpi_serial.base + RPI_UART_DR, c);
 
-	/* And wait again until FIFO's empty to prevent TTY from overwriting */
-	for (i = 0; i < 100000; i++) {
-		if (mmio_read(omap_serial.base +
-			OMAP3_LSR) & (OMAP3_LSR_THRE | OMAP3_LSR_TEMT)) {
-			break;
-		}
-	}
+    /* Wait until FIFO's empty */
+    while ( mmio_read(rpi_serial.base + RPI_UART_FR) & RPI_UARTFR_TXFF );
 }

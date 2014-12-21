@@ -11,7 +11,7 @@
 #include "arch_proto.h"
 #include "hw_intr.h"
 
-#include "omap_intr_registers.h"
+#include "rpi_intr_registers.h"
 static struct omap_intr
 {
 	vir_bytes base;

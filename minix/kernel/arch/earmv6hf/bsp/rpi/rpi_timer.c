@@ -10,8 +10,8 @@
 #include <stdio.h>
 #include "arch_proto.h"
 #include "bsp_timer.h"
-#include "omap_timer_registers.h"
-#include "omap_intr_registers.h"
+#include "rpi_timer_registers.h"
+#include "rpi_intr_registers.h"
 #include "bsp_intr.h"
 
 /* interrupt handler hook */

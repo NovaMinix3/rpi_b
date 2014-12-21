@@ -21,19 +21,19 @@ static inline void check_int(unsigned int state, int line)
 /* Data memory barrier */
 static inline void dmb(void)
 {
-	asm volatile("dmb" : : : "memory");
+	asm volatile("mcr p15, 0, %0, c7, c10, 5" : : "r" (0) : "memory");
 }
 
 /* Data synchronization barrier */
 static inline void dsb(void)
 {
-	asm volatile("dsb" : : : "memory");
+	asm volatile("mcr p15, 0, %0, c7, c10, 4" : : "r" (0) : "memory");
 }
 
 /* Instruction synchronization barrier */
 static inline void isb(void)
 {
-	asm volatile("isb" : : : "memory");
+	asm volatile("mcr p15, 0, %0, c7,  c5, 4" : : "r" (0) : "memory");
 }
 
 static inline void barrier(void)

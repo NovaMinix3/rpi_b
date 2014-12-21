@@ -12,8 +12,8 @@
 #include "arch_proto.h"
 #include "bsp_reset.h"
 
-#include "omap_timer_registers.h"
-#include "omap_rtc.h"
+#include "rpi_timer_registers.h"
+#include "rpi_rtc.h"
 
 #define AM335X_CM_BASE 0x44E00000
 #define AM335X_CM_SIZE 0x1000

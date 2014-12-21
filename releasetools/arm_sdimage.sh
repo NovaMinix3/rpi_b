@@ -75,10 +75,10 @@ MODDIR=${DESTDIR}/boot/minix/.temp
 # for alignment reasons, prefer sizes which are multiples of 4096 bytes
 #
 : ${IMG_SIZE=$((     2*(2**30) / 512))}
-: ${FAT_SIZE=$((    10*(2**20) / 512))}
+: ${FAT_SIZE=$((    15*(2**20) / 512))}
 : ${ROOT_SIZE=$((   64*(2**20) / 512))}
 : ${HOME_SIZE=$((  128*(2**20) / 512))}
-: ${USR_SIZE=$((  1792*(2**20) / 512))}
+: ${USR_SIZE=$((  1787*(2**20) / 512))}
 
 #
 # Do some math to determine the start addresses of the partitions.
@@ -245,12 +245,29 @@ ${MKFS_VFAT_CMD} ${MKFS_VFAT_OPTS} ${IMG_DIR}/fat.img
 # -c set console e.g. tty02 or tty00
 # -v set verbosity e.g. 0 to 3
 #${RELEASETOOLSDIR}/gen_uEnv.txt.sh -c ${CONSOLE} -n -p bb/ > ${IMG_DIR}/uEnv.txt
-${RELEASETOOLSDIR}/gen_uEnv.txt.sh -c ${CONSOLE}  > ${IMG_DIR}/uEnv.txt
 
 echo "Copying configuration kernel and boot modules"
-#mcopy -bsp -i ${IMG_DIR}/fat.img  ${IMG_DIR}/$MLO ::MLO
+${RELEASETOOLSDIR}/gen_uEnv.txt.sh -c ${CONSOLE} -a ${ARCH} > ${IMG_DIR}/textfile.txt
+
+case $ARCH in
+evbearm-el)
+	mcopy -bsp -i ${IMG_DIR}/fat.img  ${IMG_DIR}/$MLO ::MLO
+    mcopy -bsp -i ${IMG_DIR}/fat.img ${IMG_DIR}/textfile.txt ::uEnv.txt
+;;
+evbearmv6hf-el)
+#copy rpi FW
+	mcopy -bsp -i ${IMG_DIR}/fat.img ${RELEASETOOLSDIR}/fw/rpi/bootcode.bin ::bootcode.bin
+	mcopy -bsp -i ${IMG_DIR}/fat.img ${RELEASETOOLSDIR}/fw/rpi/fixup_cd.dat ::fixup_cd.dat
+	mcopy -bsp -i ${IMG_DIR}/fat.img ${RELEASETOOLSDIR}/fw/rpi/fixup_x.dat ::fixup_x.dat
+	mcopy -bsp -i ${IMG_DIR}/fat.img ${RELEASETOOLSDIR}/fw/rpi/fixup.dat ::fixup.dat
+	mcopy -bsp -i ${IMG_DIR}/fat.img ${RELEASETOOLSDIR}/fw/rpi/start_cd.elf ::start_cd.elf
+	mcopy -bsp -i ${IMG_DIR}/fat.img ${RELEASETOOLSDIR}/fw/rpi/start_x.elf ::start_x.elf
+	mcopy -bsp -i ${IMG_DIR}/fat.img ${RELEASETOOLSDIR}/fw/rpi/start.elf ::start.elf
+    mcopy -bsp -i ${IMG_DIR}/fat.img ${IMG_DIR}/textfile.txt ::config.txt
+;;
+esac
+
 mcopy -bsp -i ${IMG_DIR}/fat.img ${IMG_DIR}/$UBOOT ::u-boot.img
-mcopy -bsp -i ${IMG_DIR}/fat.img ${IMG_DIR}/uEnv.txt ::uEnv.txt
 
 #
 # Do some last processing of the kernel and servers and then put them on the FAT
@@ -281,7 +298,7 @@ done
 #
 # For tftp booting
 #
-cp ${IMG_DIR}/uEnv.txt ${OBJ}/
+cp ${IMG_DIR}/textfile.txt ${OBJ}/
 
 #
 # Create the empty image where we later will put the partitions in.

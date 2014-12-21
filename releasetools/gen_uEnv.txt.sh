@@ -14,24 +14,67 @@ list="0x80200000 kernel.bin
 0x86800000 pfs.elf
 0x87000000 init.elf"
 
+
+####################
+fill_cmd() {
+	#load == load method like fatload mmc 0:1
+	#prefix is an optional directory containing the ending /
+	load=$1
+	prefix=$2
+	export IFS=" "
+	echo $list | while true
+	do
+		if ! read -r mem addr
+		then
+			break
+		fi
+		#e.g. ; fatloat mmc 0:1 0x82000000 mydir/ds.elf
+		echo -n "; $load $mem $prefix$addr"
+	done
+}
+
+fill_uEnvFile() 
+{
+	echo "# Set the command to be executed"
+	echo "uenvcmd=run $BOOT"
+	echo "bootargs=console=$CONSOLE rootdevname=c0d0p1 verbose=$VERBOSE hz=$HZ"
+	echo
+	echo 'bootminix=setenv bootargs \$bootargs board_name=\$board_name ; echo \$bootargs; go  0x80200000 \\\"$bootargs\\\"'
+	echo
+	echo "mmcbootcmd=echo starting from MMC ; mmc part 0; $(fill_cmd "fatload mmc 0:1" "") ; run bootminix"
+	echo
+	echo "# Netbooting."
+	echo "serverip=192.168.12.10"
+	echo "ipaddr=192.168.12.62"
+	echo "usbnet_devaddr=e8:03:9a:24:f9:10"
+	echo "usbethaddr=e8:03:9a:24:f9:11"
+	echo "netbootcmd=echo starting from TFTP;  $(fill_cmd "tftp" "$NETBOOT_PREFIX") ; run bootminix"
+	exit 0
+}
+
+fill_CmdFile() 
+{
+	echo "kernel=u-boot.img"
+	exit 0
+}
 #
 # PREFIX for loading file over tftp to allow hosting multiple
 # version/devices.
 NETBOOT_PREFIX=""
 NETBOOT="no"
 BOOT="mmcbootcmd"
-
 #default for the beagleboard-xM
 CONSOLE=tty02
 #verbosity
 VERBOSE=0
 HZ=1000
+ARCH=evbearm-el
 
-while getopts "c:v:h:p:n?" c
+while getopts "c:v:h:p:n:a:?" c
 do
 	case "$c" in
 	\?)
-		echo "Usage: $0 [-p netboot_prefix] -n [-c consoletty] [-v level] " >&2
+		echo "Usage: $0 [-p netboot_prefix] -n [-c consoletty] [-v level] [-a architecture]" >&2
 		exit 1
 		;;
 	n)
@@ -52,39 +95,16 @@ do
 		# system hz
 		HZ=$OPTARG
 		;;
+	a)
+		ARCH=$OPTARG
 	esac
 done
 
-fill_cmd() {
-	#load == load method like fatload mmc 0:1
-	#prefix is an optional directory containing the ending /
-	load=$1
-	prefix=$2
-	export IFS=" "
-	echo $list | while true
-	do
-		if ! read -r mem addr
-		then
-			break
-		fi
-		#e.g. ; fatloat mmc 0:1 0x82000000 mydir/ds.elf
-		echo -n "; $load $mem $prefix$addr"
-	done
-}
+if [ "$ARCH" == "evbearm-el" ]
+then
+	fill_uEnvFile
+elif [ "$ARCH" == "evbearmv6hf-el" ]
+then
+	fill_CmdFile
+fi
 
-
-echo "# Set the command to be executed"
-echo "uenvcmd=run $BOOT"
-echo "bootargs=console=$CONSOLE rootdevname=c0d0p1 verbose=$VERBOSE hz=$HZ"
-echo
-echo 'bootminix=setenv bootargs \$bootargs board_name=\$board_name ; echo \$bootargs; go  0x80200000 \\\"$bootargs\\\"'
-echo
-echo "mmcbootcmd=echo starting from MMC ; mmc part 0; $(fill_cmd "fatload mmc 0:1" "") ; run bootminix"
-echo
-echo "# Netbooting."
-echo "serverip=192.168.12.10"
-echo "ipaddr=192.168.12.62"
-echo "usbnet_devaddr=e8:03:9a:24:f9:10"
-echo "usbethaddr=e8:03:9a:24:f9:11"
-echo "netbootcmd=echo starting from TFTP;  $(fill_cmd "tftp" "$NETBOOT_PREFIX") ; run bootminix"
-exit 0

@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include "bsp_init.h"
 #include "bsp_padconf.h"
-#include "omap_rtc.h"
+#include "rpi_rtc.h"
 #include "bsp_reset.h"
 
 void
