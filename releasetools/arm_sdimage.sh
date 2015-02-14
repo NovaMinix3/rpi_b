@@ -163,7 +163,6 @@ mkdir -p ${IMG_DIR}
 #
 ${RELEASETOOLSDIR}/fetch_u-boot.sh -o ${RELEASETOOLSDIR}/u-boot -a $U_BOOT_SOURCE -b $U_BOOT_BRANCH -n $U_BOOT_GIT_VERSION -d $U_BOOT_BIN_DIR
 cp ${RELEASETOOLSDIR}/u-boot/${U_BOOT_BIN_DIR}/u-boot.img ${IMG_DIR}/
-#cp ${RELEASETOOLSDIR}/u-boot/${U_BOOT_BIN_DIR}/MLO ${IMG_DIR}/
 
 if [ ${CREATE_IMAGE_ONLY} -eq 0 ]
 then
@@ -176,8 +175,8 @@ then
 	#
 	# Now start the build.
 	#
+	#sh ${BUILDSH} -j ${JOBS} -m ${ARCH} -O ${OBJ} -D ${DESTDIR} ${BUILDVARS} -U -u cleandir
 	sh ${BUILDSH} -j ${JOBS} -m ${ARCH} -O ${OBJ} -D ${DESTDIR} ${BUILDVARS} -U -u distribution
-
 fi
 
 #
@@ -247,14 +246,16 @@ ${MKFS_VFAT_CMD} ${MKFS_VFAT_OPTS} ${IMG_DIR}/fat.img
 #${RELEASETOOLSDIR}/gen_uEnv.txt.sh -c ${CONSOLE} -n -p bb/ > ${IMG_DIR}/uEnv.txt
 
 echo "Copying configuration kernel and boot modules"
-${RELEASETOOLSDIR}/gen_uEnv.txt.sh -c ${CONSOLE} -a ${ARCH} > ${IMG_DIR}/textfile.txt
-
+${RELEASETOOLSDIR}/gen_uEnv.txt.sh -c ${CONSOLE} -a ${ARCH} -t uEnv > ${IMG_DIR}/uEnv.txt
+	
 case $ARCH in
 evbearm-el)
+
 	mcopy -bsp -i ${IMG_DIR}/fat.img  ${IMG_DIR}/$MLO ::MLO
-    mcopy -bsp -i ${IMG_DIR}/fat.img ${IMG_DIR}/textfile.txt ::uEnv.txt
+	mcopy -bsp -i ${IMG_DIR}/fat.img ${IMG_DIR}/uEnv.txt ::uEnv.txt
 ;;
 evbearmv6hf-el)
+	${RELEASETOOLSDIR}/gen_uEnv.txt.sh -c ${CONSOLE} -a ${ARCH} -t config > ${IMG_DIR}/config.txt
 #copy rpi FW
 	mcopy -bsp -i ${IMG_DIR}/fat.img ${RELEASETOOLSDIR}/fw/rpi/bootcode.bin ::bootcode.bin
 	mcopy -bsp -i ${IMG_DIR}/fat.img ${RELEASETOOLSDIR}/fw/rpi/fixup_cd.dat ::fixup_cd.dat
@@ -263,7 +264,8 @@ evbearmv6hf-el)
 	mcopy -bsp -i ${IMG_DIR}/fat.img ${RELEASETOOLSDIR}/fw/rpi/start_cd.elf ::start_cd.elf
 	mcopy -bsp -i ${IMG_DIR}/fat.img ${RELEASETOOLSDIR}/fw/rpi/start_x.elf ::start_x.elf
 	mcopy -bsp -i ${IMG_DIR}/fat.img ${RELEASETOOLSDIR}/fw/rpi/start.elf ::start.elf
-    mcopy -bsp -i ${IMG_DIR}/fat.img ${IMG_DIR}/textfile.txt ::config.txt
+	mcopy -bsp -i ${IMG_DIR}/fat.img ${IMG_DIR}/config.txt ::config.txt
+	mcopy -bsp -i ${IMG_DIR}/fat.img ${IMG_DIR}/uEnv.txt ::uEnv.txt
 ;;
 esac
 
@@ -298,8 +300,11 @@ done
 #
 # For tftp booting
 #
-cp ${IMG_DIR}/textfile.txt ${OBJ}/
-
+cp ${IMG_DIR}/uEnv.txt ${OBJ}/
+if [ "$ARCH" == "evbearmv6hf-el" ]
+then
+cp ${IMG_DIR}/config.txt ${OBJ}/
+fi
 #
 # Create the empty image where we later will put the partitions in.
 # Make sure it is at least 2GB, otherwise the SD card will not be detected

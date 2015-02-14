@@ -164,7 +164,7 @@ static struct shortname2id shortname2id[] = {
 	{.name = "BBXM",.id = BOARD_ID_BBXM},
 	{.name = "A335BONE",.id = BOARD_ID_BBW},
 	{.name = "A335BNLT",.id = BOARD_ID_BBB},
-	{.name = "RPIBPL",.id = BOARD_ID_RPI},
+	{.name = "rpi_b",.id = BOARD_ID_RPI},
 };
 
 struct board_id2name

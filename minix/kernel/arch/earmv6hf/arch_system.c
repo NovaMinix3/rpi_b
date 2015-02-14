@@ -115,19 +115,21 @@ void arch_init(void)
 
 
         /* enable user space access to cycle counter */
+        /* http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0360e/I1003211.html */
         /* set cycle counter to 0: ARM ARM B4.1.113 and B4.1.117 */
-        asm volatile ("MRC p15, 0, %0, c9, c12, 0\t\n": "=r" (value));
+        asm volatile ("MRC p15, 0, %0, c15, c12, 0\t\n": "=r" (value));
         value |= PMU_PMCR_C; /* Reset counter */
         value |= PMU_PMCR_E; /* Enable counter hardware */
-        asm volatile ("MCR p15, 0, %0, c9, c12, 0\t\n": : "r" (value));
+        asm volatile ("MCR p15, 0, %0, c15, c12, 0\t\n": : "r" (value));
 
         /* enable CCNT counting: ARM ARM B4.1.116 */
         value = PMU_PMCNTENSET_C; /* Enable PMCCNTR cycle counter */
-        asm volatile ("MCR p15, 0, %0, c9, c12, 1\t\n": : "r" (value));
+        asm volatile ("MCR p15, 0, %0, c15, c12, 1\t\n": : "r" (value));
 
         /* enable cycle counter in user mode: ARM ARM B4.1.124 */
+        /* http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0360e/I1003211.html */
         value = PMU_PMUSERENR_EN;
-        asm volatile ("MCR p15, 0, %0, c9, c14, 0\t\n": : "r" (value));
+        asm volatile ("MCR p15, 0, %0, c15, c9, 0\t\n": : "r" (value));
 	bsp_init();
 }
 

@@ -71,8 +71,8 @@ static void pagefault( struct proc *pr,
 	}
 
 	if(is_nested) {
-		printf("pagefault in kernel at pc 0x%lx address 0x%lx\n",
-			*saved_lr, pagefault_addr);
+		printf("pagefault in kernel at pc 0x%lx address 0x%lx, flags = 0x%x\n",
+			*saved_lr, pagefault_addr, pagefault_status);
 		inkernel_disaster(pr, saved_lr, NULL, is_nested);
 	}
 

@@ -1,3 +1,4 @@
+#include "kernel/kernel.h"
 #include <sys/types.h>
 #include "bsp_init.h"
 #include "bsp_padconf.h"
@@ -8,10 +9,11 @@ void
 bsp_init()
 {
 	/* map memory for padconf */
+    /* bcm2835 does not have pad ctrl */
 	bsp_padconf_init();
 
 	/* map memory for rtc */
-	omap3_rtc_init();
+	rpi_rtc_init();
 
 	/* map memory for reset control */
 	bsp_reset_init();

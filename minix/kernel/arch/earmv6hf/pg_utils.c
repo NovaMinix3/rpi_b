@@ -218,24 +218,21 @@ void vm_enable_paging(void)
 	sctlr |= CPU_CONTROL_MMU_ENABLE;
 
 	/* TRE set to zero (default reset value): TEX[2:0] are used, plus C and B bits.*/
-	sctlr &= ~CPU_CONTROL_TR_ENABLE;
+	//sctlr &= ~CPU_CONTROL_TR_ENABLE;
 
 	/* AFE set to zero (default reset value): not using simplified model. */
-	sctlr &= ~CPU_CONTROL_AF_ENABLE;
+	//sctlr &= ~CPU_CONTROL_AF_ENABLE;
 
 	/* Enable instruction ,data cache and branch prediction */
 	sctlr |= CPU_CONTROL_DC_ENABLE;
 	sctlr |= CPU_CONTROL_IC_ENABLE;
-	sctlr |= CPU_CONTROL_BPRD_ENABLE;
 
 	/* Enable barriers */
 	sctlr |= CPU_CONTROL_32BD_ENABLE;
+	sctlr |= CPU_CONTROL_32BP_ENABLE;
 
-	/* Enable L2 cache (cortex-a8) */
-	#define CORTEX_A8_L2EN   (0x02)
-	actlr = read_actlr();
-	actlr |= CORTEX_A8_L2EN;
-	write_actlr(actlr);
+	sctlr |= CPU_CONTROL_UNAL_ENABLE;
+	sctlr |= CPU_CONTROL_XP_ENABLE;
 
 	write_sctlr(sctlr);
 }

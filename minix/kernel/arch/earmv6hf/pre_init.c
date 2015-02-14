@@ -179,9 +179,9 @@ int overlaps(multiboot_module_t *mod, int n, int cmp_mod)
 
 /* XXX: hard-coded stuff for modules */
 #define MB_MODS_NR NR_BOOT_MODULES
-#define MB_MODS_BASE  0x82000000
+#define MB_MODS_BASE  0x02000000
 #define MB_MODS_ALIGN 0x00800000 /* 8 MB */
-#define MB_MMAP_START 0x80000000
+#define MB_MMAP_START 0x00000000
 #define MB_MMAP_SIZE  0x10000000 /* 256 MB */
 
 multiboot_module_t mb_modlist[MB_MODS_NR];
@@ -371,7 +371,7 @@ void set_machine_id(char *cmdline)
 	}
 }
 
-kinfo_t *pre_init( int argc, char **argv)
+kinfo_t *pre_init(int argc, char **argv)
 {
 	char *bootargs;
 	/* This is the main "c" entry point into the kernel. It gets called
@@ -386,30 +386,27 @@ kinfo_t *pre_init( int argc, char **argv)
 	 * arguments. by convention the second argument is the
 	 *  command line */
 	if (argc != 2) {
-		//POORMANS_FAILURE_NOTIFICATION;
+		POORMANS_FAILURE_NOTIFICATION;
 	}
 
-	//bootargs = argv[1];
-	//set_machine_id(bootargs);
+	bootargs = argv[1];
+	set_machine_id(bootargs);
 	bsp_ser_init();
-    bsp_ser_putc('t');
-    bsp_ser_putc('a');
-    bsp_ser_putc('k');
 	/* Get our own copy boot params pointed to by ebx.
 	 * Here we find out whether we should do serial output.
 	 */
-	//get_parameters(&kinfo, bootargs);
+	get_parameters(&kinfo, bootargs);
 
 	/* Make and load a pagetable that will map the kernel
 	 * to where it should be; but first a 1:1 mapping so
 	 * this code stays where it should be.
 	 */
-	//dcache_clean(); /* clean the caches */
-	//pg_clear();
-	//pg_identity(&kinfo);
-	//kinfo.freepde_start = pg_mapkernel();
-	//pg_load();
-	//vm_enable_paging();
+	dcache_clean(); /* clean the caches */
+	pg_clear();
+	pg_identity(&kinfo);
+	kinfo.freepde_start = pg_mapkernel();
+	pg_load();
+	vm_enable_paging();
 
 	/* Done, return boot info so it can be passed to kmain(). */
 	return &kinfo;

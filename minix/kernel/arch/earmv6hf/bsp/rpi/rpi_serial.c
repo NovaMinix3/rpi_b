@@ -45,11 +45,10 @@ static kern_phys_map serial_phys_map;
 void
 bsp_ser_init()
 {
-	/*if (BOARD_IS_RPI(machine.board_id)) 
+	if (BOARD_IS_RPI(machine.board_id)) 
     {
 		rpi_serial.base = RPI_BCM2835_DEBUG_UART_BASE;
-	}*/
-    rpi_serial.base = RPI_BCM2835_DEBUG_UART_BASE;
+	}
 	rpi_serial.size = 0x1000;	/* 4k */
 
 	kern_phys_map_ptr(rpi_serial.base, rpi_serial.size,
@@ -63,14 +62,24 @@ bsp_ser_putc(char c)
 {
 	int i;
 	assert(rpi_serial.base);
-    /* Wait until there is space in the FIFO */
 
 	/* Wait until FIFO's empty */
-    while ( mmio_read(rpi_serial.base + RPI_UART_FR) & RPI_UARTFR_TXFF );
-
+	for (i = 0; i < 100000; i++) 
+	{
+		if ( mmio_read(rpi_serial.base + RPI_UART_FR) & RPI_UARTFR_TXFF ) 
+		{
+			break;
+		}
+	}
 	/* Write character */
 	mmio_write(rpi_serial.base + RPI_UART_DR, c);
 
     /* Wait until FIFO's empty */
-    while ( mmio_read(rpi_serial.base + RPI_UART_FR) & RPI_UARTFR_TXFF );
+	for (i = 0; i < 100000; i++) 
+	{
+		if ( mmio_read(rpi_serial.base + RPI_UART_FR) & RPI_UARTFR_TXFF ) 
+		{
+			break;
+		}
+	}
 }

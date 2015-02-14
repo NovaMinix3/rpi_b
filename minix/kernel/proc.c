@@ -118,44 +118,47 @@ static void set_idle_name(char * name, int n)
 
 void proc_init(void)
 {
-	struct proc * rp;
-	struct priv *sp;
-	int i;
+    struct proc * rp;
+    struct priv *sp;
+    int i;
 
-	/* Clear the process table. Announce each slot as empty and set up
-	 * mappings for proc_addr() and proc_nr() macros. Do the same for the
-	 * table with privilege structures for the system processes. 
-	 */
-	for (rp = BEG_PROC_ADDR, i = -NR_TASKS; rp < END_PROC_ADDR; ++rp, ++i) {
-		rp->p_rts_flags = RTS_SLOT_FREE;/* initialize free slot */
-		rp->p_magic = PMAGIC;
-		rp->p_nr = i;			/* proc number from ptr */
-		rp->p_endpoint = _ENDPOINT(0, rp->p_nr); /* generation no. 0 */
-		rp->p_scheduler = NULL;		/* no user space scheduler */
-		rp->p_priority = 0;		/* no priority */
-		rp->p_quantum_size_ms = 0;	/* no quantum size */
+    /* Clear the process table. Announce each slot as empty and set up
+     * mappings for proc_addr() and proc_nr() macros. Do the same for the
+     * table with privilege structures for the system processes. 
+     */
+    for (rp = BEG_PROC_ADDR, i = -NR_TASKS; rp < END_PROC_ADDR; ++rp, ++i) 
+    {
+        rp->p_rts_flags = RTS_SLOT_FREE;            /* initialize free slot     */
+        rp->p_magic = PMAGIC;
+        rp->p_nr = i;                               /* proc number from ptr     */
+        rp->p_endpoint = _ENDPOINT(0, rp->p_nr);    /* generation no. 0         */
+        rp->p_scheduler = NULL;                     /* no user space scheduler  */
+        rp->p_priority = 0;                         /* no priority              */
+        rp->p_quantum_size_ms = 0;                  /* no quantum size          */
 
-		/* arch-specific initialization */
-		arch_proc_reset(rp);
-	}
-	for (sp = BEG_PRIV_ADDR, i = 0; sp < END_PRIV_ADDR; ++sp, ++i) {
-		sp->s_proc_nr = NONE;		/* initialize as free */
-		sp->s_id = (sys_id_t) i;	/* priv structure index */
-		ppriv_addr[i] = sp;		/* priv ptr from number */
-		sp->s_sig_mgr = NONE;		/* clear signal managers */
-		sp->s_bak_sig_mgr = NONE;
-	}
+        /* arch-specific initialization */
+        arch_proc_reset(rp);
+    }
+    for (sp = BEG_PRIV_ADDR, i = 0; sp < END_PRIV_ADDR; ++sp, ++i) 
+    {
+        sp->s_proc_nr = NONE;                       /* initialize as free       */
+        sp->s_id = (sys_id_t) i;                    /* priv structure index     */
+        ppriv_addr[i] = sp;                         /* priv ptr from number     */
+        sp->s_sig_mgr = NONE;                       /* clear signal managers    */
+        sp->s_bak_sig_mgr = NONE;
+    }
 
-	idle_priv.s_flags = IDL_F;
-	/* initialize IDLE structures for every CPU */
-	for (i = 0; i < CONFIG_MAX_CPUS; i++) {
-		struct proc * ip = get_cpu_var_ptr(i, idle_proc);
-		ip->p_endpoint = IDLE;
-		ip->p_priv = &idle_priv;
-		/* must not let idle ever get scheduled */
-		ip->p_rts_flags |= RTS_PROC_STOP;
-		set_idle_name(ip->p_name, i);
-	}
+    idle_priv.s_flags = IDL_F;
+    /* initialize IDLE structures for every CPU */
+    for (i = 0; i < CONFIG_MAX_CPUS; i++) 
+    {
+        struct proc * ip = get_cpu_var_ptr(i, idle_proc);
+        ip->p_endpoint = IDLE;
+        ip->p_priv = &idle_priv;
+        /* must not let idle ever get scheduled */
+        ip->p_rts_flags |= RTS_PROC_STOP;
+        set_idle_name(ip->p_name, i);
+    }
 }
 
 static void switch_address_space_idle(void)

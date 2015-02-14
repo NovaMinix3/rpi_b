@@ -19,40 +19,12 @@
 #include "arch_proto.h"
 #include "rpi_rtc.h"
 
-#define RTC_SS_BASE 0x44e3e000
-#define RTC_SS_SIZE 0x1000
-#define RTC_CTRL_REG 0x40
-#define RTC_CTRL_RTC_STOP_BIT 0
-
-struct omap_rtc
+void rpi_rtc_init(void)
 {
-	vir_bytes base;
-	vir_bytes size;
-};
 
-static struct omap_rtc omap_rtc = {
-	.base = RTC_SS_BASE,
-	.size = RTC_SS_SIZE
-};
-
-static kern_phys_map rtc_phys_map;
-
-void
-omap3_rtc_init(void)
-{
-	if (BOARD_IS_BB(machine.board_id)) {
-		kern_phys_map_ptr(omap_rtc.base, omap_rtc.size,
-		    VMMF_UNCACHED | VMMF_WRITE, &rtc_phys_map,
-		    (vir_bytes) & omap_rtc.base);
-	}
 }
 
-void
-omap3_rtc_run(void)
+void rpi_rtc_run(void)
 {
-	if (BOARD_IS_BB(machine.board_id)) {
-		/* Setting the stop bit starts the RTC running */
-		mmio_set((omap_rtc.base + RTC_CTRL_REG),
-		    (1 << RTC_CTRL_RTC_STOP_BIT));
-	}
+
 }

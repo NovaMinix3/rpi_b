@@ -1,7 +1,6 @@
 #ifndef _OMAP_TIMER_REGISTERS_H
 #define _OMAP_TIMER_REGISTERS_H
 
-
 /* General-purpose timer register map */
 #define OMAP3_GPTIMER1_BASE  0x48318000 /* GPTIMER1 physical address */
 #define OMAP3_GPTIMER2_BASE  0x49032000 /* GPTIMER2 physical address */
@@ -65,9 +64,14 @@
 #define AM335X_TIMER_TSICR     0x054 /* Control posted mode and functional SW reset */
 #define AM335X_TIMER_TCAR2     0x058 /* Second captured value of counter register */
 
-#define AM335X_WDT_BASE		0x44E35000	/* watchdog timer */
-#define AM335X_WDT_WWPS		0x34		/* command posted status */
-#define AM335X_WDT_WSPR		0x48		/* activate/deactivate sequence */
+#define RPI_WDT_BASE            0x20100000	/* watchdog timer */
+#define RPI_PM_RSTC             0x1c
+#define RPI_PM_WDOG             0x24
+#define RPI_PM_PASSWORD         0x5a00000
+#define RPI_PM_RSTC_RESET       0x00000102
+#define RPI_PM_RSTC_CONFIGMASK  0x00000030
+#define RPI_PM_RSTC_FULL_RESET  0x00000020
+#define RPI_PM_WDOG_TIMEMASK    0x000fffff
 
 /* Interrupt status register fields */
 #define OMAP3_TISR_MAT_IT_FLAG  (1 << 0) /* Pending match interrupt status */

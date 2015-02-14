@@ -4,7 +4,7 @@
 
 #ifndef GCC_TM_H
 #define GCC_TM_H
-#define TARGET_CPU_DEFAULT (TARGET_CPU_generic)
+#define TARGET_CPU_DEFAULT (TARGET_CPU_arm1176jzfs)
 #ifdef IN_GCC
 # include "options.h"
 # include "config/dbxelf.h"

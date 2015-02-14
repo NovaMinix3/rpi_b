@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #generate a u-boot u-env.
-list="0x80200000 kernel.bin
+list_BBB="0x80200000 kernel.bin
 0x82000000 ds.elf
 0x82800000 rs.elf
 0x83000000 pm.elf
@@ -14,6 +14,18 @@ list="0x80200000 kernel.bin
 0x86800000 pfs.elf
 0x87000000 init.elf"
 
+list_RPI="0x200000 kernel.bin
+0x2000000 ds.elf
+0x2800000 rs.elf
+0x3000000 pm.elf
+0x3800000 sched.elf
+0x4000000 vfs.elf
+0x4800000 memory.elf
+0x5000000 tty.elf
+0x5800000 mfs.elf
+0x6000000 vm.elf
+0x6800000 pfs.elf
+0x7000000 init.elf"
 
 ####################
 fill_cmd() {
@@ -21,6 +33,13 @@ fill_cmd() {
 	#prefix is an optional directory containing the ending /
 	load=$1
 	prefix=$2
+	if [ "$ARCH" == "evbearm-el" ]
+	then
+		list=$list_BBB
+	elif [ "$ARCH" == "evbearmv6hf-el" ]
+	then
+		list=$list_RPI
+	fi	
 	export IFS=" "
 	echo $list | while true
 	do
@@ -29,11 +48,11 @@ fill_cmd() {
 			break
 		fi
 		#e.g. ; fatloat mmc 0:1 0x82000000 mydir/ds.elf
-		echo -n "; $load $mem $prefix$addr"
+		echo -n "$load $mem $prefix$addr;"
 	done
 }
 
-fill_uEnvFile() 
+fill_uEnvFile_BBB()
 {
 	echo "# Set the command to be executed"
 	echo "uenvcmd=run $BOOT"
@@ -52,7 +71,22 @@ fill_uEnvFile()
 	exit 0
 }
 
-fill_CmdFile() 
+fill_uEnvFile_RPI()
+{
+	echo "# Set the command to be executed"
+	echo "bootargs=console=$CONSOLE  verbose=$VERBOSE hz=$HZ"
+	echo
+	echo 'bootminix=setenv bootargs \$bootargs board_name=\$board_name ; echo \$bootargs; go  0x200000 \\\"$bootargs\\\"'
+	echo
+	echo "bootcmd=echo starting from MMC; $(fill_cmd "fatload mmc 0:1" "") run bootminix"
+	echo "# Netbooting."
+    echo "ethaddr=e8:03:9a:24:f9:10"
+    echo "netbootcmd=echo starting from TFTP; usb start; $(fill_cmd "dhcp" "") run bootminix"
+    echo "bootcmd=run netbootcmd"
+	exit 0
+}
+
+fill_CfgFile_RPI() 
 {
 	echo "kernel=u-boot.img"
 	exit 0
@@ -66,11 +100,12 @@ BOOT="mmcbootcmd"
 #default for the beagleboard-xM
 CONSOLE=tty02
 #verbosity
-VERBOSE=0
+VERBOSE=3
 HZ=1000
 ARCH=evbearm-el
+FILE_TYPE=""
 
-while getopts "c:v:h:p:n:a:?" c
+while getopts "c:v:h:p:n:a:t:?" c
 do
 	case "$c" in
 	\?)
@@ -97,14 +132,27 @@ do
 		;;
 	a)
 		ARCH=$OPTARG
+		;;
+	t)
+		FILE_TYPE=$OPTARG
+		;;
 	esac
 done
 
 if [ "$ARCH" == "evbearm-el" ]
 then
-	fill_uEnvFile
+	if [ "$FILE_TYPE" == "uEnv" ]
+	then
+		fill_uEnvFile_BBB
+	fi
 elif [ "$ARCH" == "evbearmv6hf-el" ]
 then
-	fill_CmdFile
+	if [ "$FILE_TYPE" == "uEnv" ]
+	then
+		fill_uEnvFile_RPI
+	elif [ "$FILE_TYPE" == "config" ]
+	then
+		fill_CfgFile_RPI
+	fi
 fi
 

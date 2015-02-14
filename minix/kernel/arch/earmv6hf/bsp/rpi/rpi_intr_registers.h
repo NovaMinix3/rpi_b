@@ -1,9 +1,17 @@
-#ifndef _OMAP_INTR_H
-#define _OMAP_INTR_H
+#ifndef _RPI_INTR_H
+#define _RPI_INTR_H
 
 /* Interrupt controller memory map */
-#define OMAP3_DM37XX_INTR_BASE 0x48200000 /* INTCPS physical address */
-
+#define RPI_INTR_BASE 0x2000B200 /* INTCPS physical address */
+#define RPI_INTCPS_PENDING_IRQ_BASIC    0x00
+#define RPI_INTCPS_PENDING_IRQ0         0x04
+#define RPI_INTCPS_PENDING_IRQ1         0x08
+#define RPI_INTCPS_MIR_SET0             0x1C /* Set interrupt mask bits */
+#define RPI_INTCPS_MIR_SET1             0x20 /* Set interrupt mask bits */
+#define RPI_INTCPS_MIR_SET_BASIC        0x24 /* Set interrupt mask bits */
+#define RPI_INTCPS_MIR_CLEAR0           0x10 /* Clear interrupt mask bits */
+#define RPI_INTCPS_MIR_CLEAR1           0x14 /* Clear interrupt mask bits */
+#define RPI_INTCPS_MIR_CLEAR_BASIC      0x18 /* Clear interrupt mask bits */
 
 /* Interrupt controller memory map */
 #define OMAP3_AM335X_INTR_BASE 0x48200000 /* INTCPS physical address */

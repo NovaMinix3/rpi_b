@@ -1,7 +1,7 @@
-#ifndef __OMAP_RTC_H
-#define __OMAP_RTC_H
+#ifndef __RPI_RTC_H
+#define __RPI_RTC_H
 
-void omap3_rtc_init(void);
-void omap3_rtc_run(void);
+void rpi_rtc_init(void);
+void rpi_rtc_run(void);
 
-#endif /* __OMAP_RTC_H */
+#endif /* __RPI_RTC_H */

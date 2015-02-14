@@ -18,45 +18,34 @@
 #include "kernel/const.h"
 #include "kernel/type.h"
 
-struct priv {
-  proc_nr_t s_proc_nr;		/* number of associated process */
-  sys_id_t s_id;		/* index of this system structure */
-  short s_flags;		/* PREEMTIBLE, BILLABLE, etc. */
-
-  /* Asynchronous sends */
-  vir_bytes s_asyntab;		/* addr. of table in process' address space */
-  size_t s_asynsize;		/* number of elements in table. 0 when not in
-				 * use
-				 */
-
-  short s_trap_mask;		/* allowed system call traps */
-  sys_map_t s_ipc_to;		/* allowed destination processes */
-
-  /* allowed kernel calls */
-  bitchunk_t s_k_call_mask[SYS_CALL_MASK_SIZE];
-
-  endpoint_t s_sig_mgr;		/* signal manager for system signals */
-  endpoint_t s_bak_sig_mgr;	/* backup signal manager for system signals */
-  sys_map_t s_notify_pending;  	/* bit map with pending notifications */
-  sys_map_t s_asyn_pending;	/* bit map with pending asyn messages */
-  irq_id_t s_int_pending;	/* pending hardware interrupts */
-  sigset_t s_sig_pending;	/* pending signals */
-
-  minix_timer_t s_alarm_timer;	/* synchronous alarm timer */
-  reg_t *s_stack_guard;		/* stack guard word for kernel tasks */
-
-  char s_diag_sig;		/* send a SIGKMESS when diagnostics arrive? */
-
-  int s_nr_io_range;		/* allowed I/O ports */
-  struct io_range s_io_tab[NR_IO_RANGE];
-
-  int s_nr_mem_range;		/* allowed memory ranges */
-  struct minix_mem_range s_mem_tab[NR_MEM_RANGE];
-
-  int s_nr_irq;			/* allowed IRQ lines */
-  int s_irq_tab[NR_IRQ];
-  vir_bytes s_grant_table;	/* grant table address of process, or 0 */
-  int s_grant_entries;		/* no. of entries, or 0 */
+struct priv 
+{
+            proc_nr_t       s_proc_nr;          /* number of associated process                     */
+            sys_id_t        s_id;               /* index of this system structure                   */
+            short           s_flags;            /* PREEMTIBLE, BILLABLE, etc.                       */
+            /* Asynchronous sends */
+            vir_bytes       s_asyntab;          /* addr. of table in process' address space         */
+            size_t          s_asynsize;         /* number of elements in table. 0 when not in use   */
+            short           s_trap_mask;        /* allowed system call traps                        */
+            sys_map_t       s_ipc_to;           /* allowed destination processes                    */
+            bitchunk_t      s_k_call_mask[SYS_CALL_MASK_SIZE]; /* allowed kernel calls              */
+            endpoint_t      s_sig_mgr;          /* signal manager for system signals                */
+            endpoint_t      s_bak_sig_mgr;      /* backup signal manager for system signals         */
+            sys_map_t       s_notify_pending;   /* bit map with pending notifications               */
+            sys_map_t       s_asyn_pending;     /* bit map with pending asyn messages               */
+            irq_id_t        s_int_pending;      /* pending hardware interrupts                      */
+            sigset_t        s_sig_pending;      /* pending signals                                  */
+            minix_timer_t   s_alarm_timer;      /* synchronous alarm timer                          */
+            reg_t          *s_stack_guard;      /* stack guard word for kernel tasks                */
+            char            s_diag_sig;         /* send a SIGKMESS when diagnostics arrive?         */
+            int             s_nr_io_range;      /* allowed I/O ports                                */
+  struct    io_range        s_io_tab[NR_IO_RANGE];
+            int             s_nr_mem_range;     /* allowed memory ranges                            */
+  struct    minix_mem_range s_mem_tab[NR_MEM_RANGE];
+            int             s_nr_irq;           /* allowed IRQ lines                                */
+            int             s_irq_tab[NR_IRQ];
+            vir_bytes       s_grant_table;      /* grant table address of process, or 0             */
+            int             s_grant_entries;    /* no. of entries, or 0                             */
 };
 
 /* Guard word for task stacks. */

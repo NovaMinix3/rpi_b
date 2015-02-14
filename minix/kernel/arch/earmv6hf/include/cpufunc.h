@@ -103,6 +103,7 @@ static inline u32_t ipow2(u32_t t)
  * type = 2 == INVALIDATE
  */
 static inline void dcache_maint(int type){
+#if 0
 	u32_t cache_level ;
 	u32_t clidr;
 	u32_t ctype;
@@ -138,15 +139,29 @@ static inline void dcache_maint(int type){
 				u32_t val = ( way << (32 - way_bits) ) |  (set << l) | (cache_level << 1 );
 				if (type == 1) {
 					/* DCCISW, Data Cache Clean and Invalidate by Set/Way */
-					asm volatile("mcr p15, 0, %[set], c7, c14, 2 @ DCCISW" 
+					asm volatile("mcr p15, 0, %[set], c7, c14, 2 @ DCCISW"
 							: : [set] "r" (val));
 				} else if (type ==2 ){
 					/* DCISW, Data Cache Invalidate by Set/Way */
-					asm volatile("mcr p15, 0, %[set], c7, c6, 2" 
-							: : [set] "r" (val)); 
+					asm volatile("mcr p15, 0, %[set], c7, c6, 2"
+							: : [set] "r" (val));
 				}
 			}
 		}
+	}
+#endif //0
+        if (type == 1) 
+	{
+		// invalidate caches
+		asm volatile ("mcr p15, 0, %0, c7, c7,  0" :: "r" (0) : "memory");
+		//invalidate tlb
+		asm volatile ("mcr p15, 0, %0, c8, c7,  0" :: "r" (0) : "memory"); 
+		//mcr p15,0,r2,c8,c7,0 ;@ invalidate tlb
+	} 
+	else if (type ==2 )
+	{
+		// invalidate d-cache
+		asm volatile("mcr p15, 0, r0, c7, c6, 0" : : "r" (0) : );
 	}
 	dsb();
 	isb();
