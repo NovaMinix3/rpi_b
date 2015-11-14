@@ -60,6 +60,7 @@ MKPOSTFIX:=	no
 MKRUMP:=	no
 MKSKEY:=	no
 MKYP:=		no
+USE_SYSDEBUG:=  yes
 
 WEAKALIASOVERRIDEPASS?=${NETBSDSRCDIR}/minix/llvm/bin/weak-alias-module-override.so
 GOLD_PLUGIN?=${NETBSDSRCDIR}/minix/llvm/bin/LLVMgold.so

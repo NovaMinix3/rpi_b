@@ -1,5 +1,5 @@
 # rts sources
-HERE=${NETBSDSRCDIR}/minix/lib/libc/arch/${ARCHSUBDIR}/sys
+HERE=${NETBSDSRCDIR}/minix/lib/libc/arch/${MACHINE_ARCH}/sys
 .PATH: ${HERE}
 
 TMP=ucontextoffsets.h.tmp

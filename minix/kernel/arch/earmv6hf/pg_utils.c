@@ -218,10 +218,10 @@ void vm_enable_paging(void)
 	sctlr |= CPU_CONTROL_MMU_ENABLE;
 
 	/* TRE set to zero (default reset value): TEX[2:0] are used, plus C and B bits.*/
-	//sctlr &= ~CPU_CONTROL_TR_ENABLE;
+	sctlr &= ~CPU_CONTROL_TR_ENABLE;
 
 	/* AFE set to zero (default reset value): not using simplified model. */
-	//sctlr &= ~CPU_CONTROL_AF_ENABLE;
+	sctlr &= ~CPU_CONTROL_AF_ENABLE;
 
 	/* Enable instruction ,data cache and branch prediction */
 	sctlr |= CPU_CONTROL_DC_ENABLE;

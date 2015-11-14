@@ -676,3 +676,8 @@ static void ser_init(void)
 	outb(COM1_LCR, lcr);
 }
 #endif
+
+void announce_by_arch(void)
+{
+
+}

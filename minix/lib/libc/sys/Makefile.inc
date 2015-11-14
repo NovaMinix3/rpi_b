@@ -32,5 +32,5 @@ OBJS+= lchown.o lchmod.o
 lchown.o lchown.pico lchown.bc: ${NETBSDSRCDIR}/tools/compat/lchown.c
 lchmod.o lchmod.pico lchmod.bc: ${NETBSDSRCDIR}/tools/compat/lchmod.c
 
-.include "${NETBSDSRCDIR}/minix/lib/libc/arch/${ARCHSUBDIR}/sys/Makefile.inc"
-.include "${NETBSDSRCDIR}/minix/lib/libc/arch/${ARCHSUBDIR}/Makefile.inc"
+.include "${NETBSDSRCDIR}/minix/lib/libc/arch/${MACHINE_ARCH}/sys/Makefile.inc"
+.include "${NETBSDSRCDIR}/minix/lib/libc/arch/${MACHINE_ARCH}/Makefile.inc"

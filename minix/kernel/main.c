@@ -336,6 +336,7 @@ static void announce(void)
       "Copyright 2014, Vrije Universiteit, Amsterdam, The Netherlands\n",
       OS_RELEASE);
   printf("MINIX is open source software, see http://www.minix3.org\n");
+  announce_by_arch();
 }
 
 /*===========================================================================*

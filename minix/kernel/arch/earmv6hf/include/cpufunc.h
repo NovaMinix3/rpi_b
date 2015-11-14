@@ -33,7 +33,7 @@ static inline void dsb(void)
 /* Instruction synchronization barrier */
 static inline void isb(void)
 {
-	asm volatile("mcr p15, 0, %0, c7,  c5, 4" : : "r" (0) : "memory");
+	asm volatile("mcr p15, 0, %0, c7, c5, 4" : : "r" (0) : "memory");
 }
 
 static inline void barrier(void)
@@ -475,4 +475,13 @@ static inline void write_cpsr(u32_t status)
 			: : [status] "r" (status));
 }
 
+static inline void frclock_init()
+{
+	u32_t pmcctl = ARM_PMCCTL_E | ARM_PMCCTL_P | ARM_PMCCTL_C;
+	/* Setup for ArmV6*/
+
+    asm volatile("mcr p15, 0, %[pmcctl], c15, c12, 1 @ Write PMCCTL\n\t"
+            : : [pmcctl] "r" (pmcctl));
+
+}
 #endif /* _ARM_CPUFUNC_H */

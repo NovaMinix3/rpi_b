@@ -227,6 +227,9 @@ void busy_delay_ms(int ms);
 
 /* utility.c */
 void cpu_print_freq(unsigned cpu);
+
+void announce_by_arch(void);
+void arch_read_tsc_64(u64_t *t );
 #endif /* __kernel__ */
 
 #endif /* PROTO_H */

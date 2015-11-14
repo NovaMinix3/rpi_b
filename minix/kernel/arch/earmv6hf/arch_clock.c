@@ -28,10 +28,8 @@ int init_local_timer(unsigned freq)
 {
 	bsp_timer_init(freq);
 
-	if (BOARD_IS_BBXM(machine.board_id)) {
-		tsc_per_ms[0] = 16250;
-	} else if (BOARD_IS_BB(machine.board_id)) {
-		tsc_per_ms[0] = 15000;
+	if (BOARD_IS_RPI(machine.board_id)) {
+		tsc_per_ms[0] = 1000;
 	} else {
 		panic("Can not do the clock setup. machine (0x%08x) is unknown\n",machine.board_id);
 	};
@@ -64,7 +62,7 @@ void context_stop(struct proc * p)
 	u64_t * __tsc_ctr_switch = get_cpulocal_var_ptr(tsc_ctr_switch);
 
 	read_tsc_64(&tsc);
-	assert(tsc >= *__tsc_ctr_switch);
+
 	tsc_delta = tsc - *__tsc_ctr_switch;
 	p->p_cycles += tsc_delta;
 

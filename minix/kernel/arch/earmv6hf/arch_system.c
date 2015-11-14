@@ -95,7 +95,7 @@ void cpu_identify(void)
 	cpu_info[cpu].arch = (midr >> 16) & 0xF;
 	cpu_info[cpu].part = (midr >> 4) & 0xFFF;
 	cpu_info[cpu].revision = midr & 0xF;
-	cpu_info[cpu].freq = 660; /* 660 Mhz hardcoded */
+	cpu_info[cpu].freq = 700; /* 700 Mhz hardcoded */
 }
 
 void arch_init(void)
@@ -120,11 +120,8 @@ void arch_init(void)
         asm volatile ("MRC p15, 0, %0, c15, c12, 0\t\n": "=r" (value));
         value |= PMU_PMCR_C; /* Reset counter */
         value |= PMU_PMCR_E; /* Enable counter hardware */
+        value |= PMU_PMCR_CCR;
         asm volatile ("MCR p15, 0, %0, c15, c12, 0\t\n": : "r" (value));
-
-        /* enable CCNT counting: ARM ARM B4.1.116 */
-        value = PMU_PMCNTENSET_C; /* Enable PMCCNTR cycle counter */
-        asm volatile ("MCR p15, 0, %0, c15, c12, 1\t\n": : "r" (value));
 
         /* enable cycle counter in user mode: ARM ARM B4.1.124 */
         /* http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0360e/I1003211.html */
@@ -217,4 +214,9 @@ void __switch_address_space(struct proc *p, struct proc **__ptproc)
 	*__ptproc = p;
 
 	return;
+}
+
+void announce_by_arch(void)
+{
+  printf("RaspberryPi B+ port by Andrzej Flis andrzej.flis@gmail.com\n");
 }

@@ -7,14 +7,14 @@
 #include <assert.h>
 #include <signal.h>
 #include <termios.h>
-#include "omap_serial.h"
+#include "rpi_serial.h"
 #include "tty.h"
 
 #if NR_RS_LINES > 0
 
-#define UART_FREQ       48000000L	/* timer frequency */
+#define UART_FREQ       3000000L /* timer frequency */
 #if 0
-#define DFLT_BAUD	TSPEED_DEF		/* default baud rate */
+#define DFLT_BAUD    TSPEED_DEF        /* default baud rate */
 #else
 #define DFLT_BAUD	B115200		/* default baud rate */
 #endif
@@ -48,19 +48,18 @@
  * OUT2 is also kept high all the time.
  */
 #define istart(rs) \
-	(serial_out((rs), OMAP3_MCR, UART_MCR_OUT2|UART_MCR_RTS|UART_MCR_DTR),\
+	(serial_out((rs), UART011_CR, UART011_CR_UARTEN|UART011_CR_RXE|UART011_CR_TXE),\
 		(rs)->idevready = TRUE)
 #define istop(rs) \
-	(serial_out((rs), OMAP3_MCR, UART_MCR_OUT2|UART_MCR_DTR), \
+	(serial_out((rs), UART011_CR, UART011_CR_OUT2|UART011_CR_DTR), \
 		(rs)->idevready = FALSE)
-
 /* Macro to tell if device is ready.  The rs->cts field is set to UART_MSR_CTS
  * if CLOCAL is in effect for a line without a CTS wire.
  */
-#define devready(rs) ((serial_in(rs, OMAP3_MSR) | rs->cts) & UART_MSR_CTS)
+#define devready(rs) ((serial_in(rs, UART011_FR) | rs->cts) & UART011_FR_CTS)
 
 /* Macro to tell if transmitter is ready. */
-#define txready(rs) (serial_in(rs, OMAP3_LSR) & UART_LSR_THRE)
+#define txready(rs) (serial_in(rs, UART011_FR) & UART011_FR_TXFF)
 
 /* RS232 device structure, one per device. */
 typedef struct rs232 {
@@ -76,10 +75,10 @@ typedef struct rs232 {
 #define ODONE          1	/* output completed (< output enable bits) */
 #define ORAW           2	/* raw mode for xoff disable (< enab. bits) */
 #define OWAKEUP        4	/* tty_wakeup() pending (asm code only) */
-#define ODEVREADY UART_MSR_CTS	/* external device hardware ready (CTS) */
+#define ODEVREADY   0x10	/* external device hardware ready (CTS) */
 #define OQUEUED     0x20	/* output buffer not empty */
 #define OSWREADY    0x40	/* external device software ready (no xoff) */
-#define ODEVHUP  UART_MSR_DCD	/* external device has dropped carrier */
+#define ODEVHUP     0x80	/* external device has dropped carrier */
 #define OSOFTBITS  (ODONE | ORAW | OWAKEUP | OQUEUED | OSWREADY)
 				/* user-defined bits */
 #if (OSOFTBITS | ODEVREADY | ODEVHUP) == OSOFTBITS
@@ -95,12 +94,11 @@ typedef struct rs232 {
 
   phys_bytes phys_base;		/* UART physical base address (I/O map) */
   unsigned int reg_offset;	/* UART register offset */
-  unsigned int ier;		/* copy of ier register */
+  unsigned int im;		/* copy of im register */
   unsigned int scr;		/* copy of scr register */
   unsigned int fcr;		/* copy of fcr register */
-  unsigned int dll;		/* copy of dll register */
-  unsigned int dlh;		/* copy of dlh register */
   unsigned int uartclk;		/* UART clock rate */
+  unsigned int old_status;
 
   unsigned char lstatus;	/* last line status */
   int rx_overrun_events;
@@ -120,16 +118,8 @@ typedef struct uart_port {
 	int irq;
 } uart_port_t;
 
-/* OMAP3 UART base addresses. */
-static uart_port_t dm37xx_ports[] = {
-  { OMAP3_UART1_BASE, 72},	/* UART1 */
-  { OMAP3_UART2_BASE, 73},	/* UART2 */
-  { OMAP3_UART3_BASE, 74},	/* UART3 */
-  { 0, 0 }
-};
-
-static uart_port_t am335x_ports[] = {
-  {  0x44E09000 , 72 },	/* UART0 */
+static uart_port_t rpi_ports[] = {
+  {  RPI_UART_BASE , 72 },	/* UART0 */
   { 0, 0 },
   { 0, 0 },
   { 0, 0 }
@@ -189,14 +179,13 @@ serial_out(rs232_t *rs, int offset, int val)
 static void
 rs_reset(rs232_t *rs)
 {
-	u32_t syss;
-
-	serial_out(rs, OMAP3_SYSC, UART_SYSC_SOFTRESET);
-
-	/* Poll until done */
-	do {
-		syss = serial_in(rs, OMAP3_SYSS);
-	} while (!(syss & UART_SYSS_RESETDONE));
+    unsigned int lcr;
+    while( serial_in( rs, UART011_FR ) & UART011_FR_BUSY )
+    {
+    }
+    lcr = serial_in( rs, UART011_LCRH );
+    lcr &= ~(UART011_LCRH_BRK | UART011_LCRH_FEN);
+    serial_out( rs, UART011_LCRH, lcr );
 }
 
 static int
@@ -318,37 +307,10 @@ rs_ioctl(tty_t *tp, int UNUSED(dummy))
 	return 0;	/* dummy */
 }
 
-static unsigned int
-omap_get_divisor(rs232_t *rs, unsigned int baud)
-{
-/* Calculate divisor value. The 16750 has two oversampling modes to reach
- * high baud rates with little error rate (see table 17-1 in OMAP TRM).
- * Baud rates 460800, 921600, 1843200, and 3686400 use 13x oversampling,
- * the other rates 16x. The baud rate is calculated as follows:
- * baud rate = (functional clock / oversampling) / divisor.
- */
-
-	unsigned int oversampling;
-	assert(baud != 0);
-
-	switch(baud) {
-	case B460800:	/* Fall through */
-	case B921600:	/* Fall through */
-#if 0
-	case B1843200:	/* Fall through */
-	case B3686400:	
-#endif
-		oversampling = 13; break;
-	default:	oversampling = 16;
-	}
-
-	return (rs->uartclk / oversampling) / baud;
-}
-
 static int
 termios_baud_rate(struct termios *term)
 {
-	int baud;
+	int baud, denom, div, rem, ibrd, fbrd;
 	switch(term->c_ospeed) {
 	case B300: baud = 300; break;
 	case B600: baud = 600; break;
@@ -369,71 +331,62 @@ termios_baud_rate(struct termios *term)
 		baud = termios_baud_rate(term);
 	}
 
-	return baud;
+	denom = 16 * baud;
+	div = UART_FREQ / denom;
+	rem = UART_FREQ % denom;
+
+	ibrd = div << 6;
+	fbrd = (((8 * rem) / baud) + 1) / 2;
+
+	/* Tolerance? */
+	return ibrd | fbrd;
 }
 static void rs_config(rs232_t *rs)
 {
 /* Set various line control parameters for RS232 I/O.  */
 	tty_t *tp = rs->tty;
-	unsigned int divisor, efr, lcr, mcr, baud;
+	unsigned int divisor, efr, lcr, mcr, rate, old_cr;
+    
+    /* Clear pending error and receive interrupts */
+    serial_out( rs, UART011_ICR, (UART011_OEIS | UART011_BEIS | UART011_PEIS | UART011_FEIS | UART011_RTIS | UART011_RXIS) );
+    serial_out( rs, UART011_IFLS, ( UART011_IFLS_RX4_8 | UART011_IFLS_TX4_8 ) );
+/*
+* Provoke TX FIFO interrupt into asserting.
+*/
+    serial_out( rs, UART011_CR, 0 );
+    while( serial_in( rs, UART011_FR ) & UART011_FR_BUSY );
 
-	/* Fifo and DMA settings */
-	/* See OMAP35x TRM 17.5.1.1.2 */
-	lcr = serial_in(rs, OMAP3_LCR);				/* 1a */
-	serial_out(rs, OMAP3_LCR, UART_LCR_CONF_MODE_B);	/* 1b */
-	efr = serial_in(rs, OMAP3_EFR);				/* 2a */
-	serial_out(rs, OMAP3_EFR, efr | UART_EFR_ECB);		/* 2b */
-	serial_out(rs, OMAP3_LCR, UART_LCR_CONF_MODE_A);	/* 3  */
-	mcr = serial_in(rs, OMAP3_MCR);				/* 4a */
-	serial_out(rs, OMAP3_MCR, mcr | UART_MCR_TCRTLR);	/* 4b */
-	/* Set up FIFO  */
-	rs->fcr = 0;
-	/* Set FIFO interrupt trigger levels high */
-	rs->fcr |= (0x3 << OMAP_UART_FCR_RX_FIFO_TRIG_SHIFT);
-	rs->fcr |= (0x3 << OMAP_UART_FCR_TX_FIFO_TRIG_SHIFT);
-	rs->fcr |= UART_FCR_ENABLE_FIFO;
-	serial_out(rs, OMAP3_FCR, rs->fcr);			/* 5  */
-	serial_out(rs, OMAP3_LCR, UART_LCR_CONF_MODE_B);	/* 6  */
-	/* DMA triggers, not supported by this driver */	/* 7  */
-	rs->scr = OMAP_UART_SCR_RX_TRIG_GRANU1_MASK;
-	serial_out(rs, OMAP3_SCR, rs->scr);			/* 8  */
-	serial_out(rs, OMAP3_EFR, efr);				/* 9  */
-	serial_out(rs, OMAP3_LCR, UART_LCR_CONF_MODE_A);	/* 10 */
-	serial_out(rs, OMAP3_MCR, mcr);				/* 11 */
-	serial_out(rs, OMAP3_LCR, lcr);				/* 12 */
-	
-	/* RS232 needs to know the xoff character, and if CTS works. */
-	rs->oxoff = tp->tty_termios.c_cc[VSTOP];
-	rs->cts = (tp->tty_termios.c_cflag & CLOCAL) ? UART_MSR_CTS : 0;
-	baud = termios_baud_rate(&tp->tty_termios);
+    rs->old_status = serial_in( rs, UART011_FR ) & UART011_FR_MODEM_ANY;
+    
+    /* RS232 needs to know the xoff character, and if CTS works. */
+    rs->oxoff = tp->tty_termios.c_cc[VSTOP];
+    rs->cts = (tp->tty_termios.c_cflag & CLOCAL) ? UART011_FR_CTS : 0;
 
-	/* Look up the 16750 rate divisor from the output speed. */
-	divisor = omap_get_divisor(rs, baud);
-	rs->dll = divisor & 0xFF;
-	rs->dlh = divisor >> 8;
 
-	/* Compute line control flag bits. */
-	lcr = 0;
-	if (tp->tty_termios.c_cflag & PARENB) {
-		lcr |= UART_LCR_PARITY;
-		if (!(tp->tty_termios.c_cflag & PARODD)) lcr |= UART_LCR_EPAR;
-  	}
-  	if (tp->tty_termios.c_cflag & CSTOPB) lcr |= UART_LCR_STOP;
-  	switch(tp->tty_termios.c_cflag & CSIZE) {
+    rate = termios_baud_rate(&tp->tty_termios);
+
+    /* Compute line control flag bits. */
+    lcr = 0;
+    if (tp->tty_termios.c_cflag & PARENB) {
+	lcr |= UART011_LCRH_PEN;
+	if (!(tp->tty_termios.c_cflag & PARODD)) lcr |= UART011_LCRH_EPS;
+    }
+    if (tp->tty_termios.c_cflag & CSTOPB) lcr |= UART011_LCRH_STP2;
+    switch(tp->tty_termios.c_cflag & CSIZE) {
   	case CS5:
-  		lcr |= UART_LCR_WLEN5;
+  		lcr |= UART011_LCRH_WLEN_5;
   		break;
   	case CS6:
-  		lcr |= UART_LCR_WLEN6;
+  		lcr |= UART011_LCRH_WLEN_6;
   		break;
   	case CS7:
-  		lcr |= UART_LCR_WLEN7;
+  		lcr |= UART011_LCRH_WLEN_7;
   		break;
   	default:
   	case CS8:
-  		lcr |= UART_LCR_WLEN8;
+  		lcr |= UART011_LCRH_WLEN_8;
   		break;
-  	}
+    }
 
 	/* Lock out interrupts while setting the speed. The receiver register
 	 * is going to be hidden by the div_low register, but the input
@@ -444,32 +397,26 @@ static void rs_config(rs232_t *rs)
 	if (sys_irqdisable(&rs->irq_hook_kernel_id) != OK)
 		panic("unable to disable interrupts");
 
-	/* Select the baud rate divisor registers and change the rate. */
-	/* See OMAP35x TRM 17.5.1.1.3 */
-	serial_out(rs, OMAP3_MDR1, OMAP_MDR1_DISABLE);		/* 1  */
-	serial_out(rs, OMAP3_LCR, UART_LCR_CONF_MODE_B);	/* 2  */
-	efr = serial_in(rs, OMAP3_EFR);				/* 3a */
-	serial_out(rs, OMAP3_EFR, efr | UART_EFR_ECB);		/* 3b */
-	serial_out(rs, OMAP3_LCR, 0);				/* 4  */
-	serial_out(rs, OMAP3_IER, 0);				/* 5  */
-	serial_out(rs, OMAP3_LCR, UART_LCR_CONF_MODE_B);	/* 6  */
-	serial_out(rs, OMAP3_DLL, rs->dll);			/* 7  */
-	serial_out(rs, OMAP3_DLH, rs->dlh);			/* 7  */
-	serial_out(rs, OMAP3_LCR, 0);				/* 8  */
-	serial_out(rs, OMAP3_IER, rs->ier);			/* 9  */
-	serial_out(rs, OMAP3_LCR, UART_LCR_CONF_MODE_B);	/* 10 */
-	serial_out(rs, OMAP3_EFR, efr);				/* 11 */
-	serial_out(rs, OMAP3_LCR, lcr);				/* 12 */
-	if (baud > 230400 && baud != 3000000)
-		serial_out(rs, OMAP3_MDR1, OMAP_MDR1_MODE13X);	/* 13 */
-	else
-		serial_out(rs, OMAP3_MDR1, OMAP_MDR1_MODE16X);
-	
-	rs->ostate = devready(rs) | ORAW | OSWREADY;	/* reads MSR */
+    /* first disable everything */
+    serial_out(rs, UART011_CR, 0 );
+
+ /* Set baud rate */
+        serial_out(rs, UART011_FBRD, (rate & ((1 << 6) - 1)) );
+        serial_out(rs, UART011_IBRD, (rate >> 6) );
+        /*
+         * ----------v----------v----------v----------v-----
+         * NOTE: MUST BE WRITTEN AFTER UARTLCR_M & UARTLCR_L
+         * ----------^----------^----------^----------^-----
+         */
+        serial_out(rs, UART011_LCRH, (lcr | UART011_LCRH_FEN) );
+        serial_out(rs, UART011_IMSC , rs->im );
+		lcr = UART011_CR_UARTEN | UART011_CR_RXE | UART011_CR_TXE;
+		serial_out( rs, UART011_CR, lcr );
+
+    rs->ostate = devready(rs) | ORAW | OSWREADY;	/* reads MSR */
 	if ((tp->tty_termios.c_lflag & IXON) && rs->oxoff != _POSIX_VDISABLE)
 		rs->ostate &= ~ORAW;
-	(void) serial_in(rs, OMAP3_IIR);
-
+        
 	if (sys_irqenable(&rs->irq_hook_kernel_id) != OK)
 		panic("unable to enable interrupts");
 }
@@ -480,7 +427,7 @@ rs_init(tty_t *tp)
 /* Initialize RS232 for one line. */
 	register rs232_t *rs;
 	int line;
-	uart_port_t this_omap3;
+	uart_port_t this_rpi;
 	char l[10];
 	struct minix_mem_range mr;
 	struct machine machine;
@@ -492,12 +439,6 @@ rs_init(tty_t *tp)
 	 * serial line, making tty not look at the irq and returning ENXIO
 	 * for all requests on it from userland. (The kernel will use it.)
 	 */
-	if(env_get_param(SERVARNAME, l, sizeof(l)-1) == OK && atoi(l) == line){
-		printf("TTY: rs232 line %d not initialized (used by kernel)\n",
-			line);
-		return;
-	}
-
 	rs = tp->tty_priv = &rs_lines[line];
 	rs->tty = tp;
 
@@ -506,14 +447,12 @@ rs_init(tty_t *tp)
 
 	sys_getmachine(&machine);
 	
-	if (BOARD_IS_BBXM(machine.board_id)){
-		this_omap3 = dm37xx_ports[line];
-	} else if (BOARD_IS_BB(machine.board_id)){
-		this_omap3 = am335x_ports[line];
+	if (BOARD_IS_RPI(machine.board_id)){
+		this_rpi = rpi_ports[line];
 	} else {
 		return;
 	}
-	if (this_omap3.base_addr == 0) return;
+	if (this_rpi.base_addr == 0) return;
 
 	/* Configure memory access */
 	mr.mr_base = rs->phys_base;
@@ -522,12 +461,12 @@ rs_init(tty_t *tp)
 		panic("Unable to request access to UART memory");
 	}
 	rs->phys_base = (vir_bytes) vm_map_phys(SELF,
-					(void *) this_omap3.base_addr, 0x100);
+					(void *) this_rpi.base_addr, 0x1000);
 	
 	if (rs->phys_base ==  (vir_bytes) MAP_FAILED) {
 		panic("Unable to request access to UART memory");
 	}
-	rs->reg_offset = 2;
+	rs->reg_offset = 0;
 
 	rs->uartclk = UART_FREQ;
 	rs->ohead = rs->otail = rs->obuf;
@@ -541,7 +480,7 @@ rs_init(tty_t *tp)
 	tp->tty_termios.c_ospeed = DFLT_BAUD;
 
 	/* Configure IRQ */
-	rs->irq = this_omap3.irq;
+	rs->irq = this_rpi.irq;
 
 	/* callback with irq line number + 1 because using line number 0 
 	   fails eslewhere */
@@ -566,7 +505,7 @@ rs_init(tty_t *tp)
 
 	/* Enable interrupts */
 	rs_reset(rs);
-	rs->ier = UART_IER_RLSI | UART_IER_RDI | UART_IER_MSI;
+	rs->im = UART011_RXIM | UART011_RTIM;
 	rs_config(rs);
 
 	/* Fill in TTY function hooks. */
@@ -580,7 +519,7 @@ rs_init(tty_t *tp)
 	tp->tty_break_off = rs_break_off;
 	tp->tty_open = rs_open;
 	tp->tty_close = rs_close;
-
+printf("rs_init done\n");
 	/* Tell external device we are ready. */
 	istart(rs);
 }
@@ -683,8 +622,8 @@ rs_break_on(tty_t *tp, int UNUSED(dummy))
 	rs232_t *rs = tp->tty_priv;
 	unsigned int lsr;
 
-	lsr = serial_in(rs, OMAP3_LSR);
-	serial_out(rs, OMAP3_LSR, lsr | UART_LSR_BI);
+    lsr = serial_in(rs, UART011_LCRH);
+	serial_out(rs, UART011_LCRH, lsr | UART011_LCRH_BRK);
 	return 0;	/* dummy */
 }
 
@@ -695,8 +634,8 @@ rs_break_off(tty_t *tp, int UNUSED(dummy))
 	rs232_t *rs = tp->tty_priv;
 	unsigned int lsr;
 
-	lsr = serial_in(rs, OMAP3_LSR);
-	serial_out(rs, OMAP3_LSR, lsr & ~UART_LSR_BI);
+	lsr = serial_in(rs, UART011_LCRH);
+	serial_out(rs, UART011_LCRH, lsr & ~UART011_LCRH_BRK);
 	return 0;	/* dummy */
 }
 
@@ -713,13 +652,11 @@ rs_close(tty_t *tp, int UNUSED(dummy))
 {
 /* The line is closed; optionally hang up. */
 	rs232_t *rs = tp->tty_priv;
-
 	if (tp->tty_termios.c_cflag & HUPCL) {
-		serial_out(rs, OMAP3_MCR, UART_MCR_OUT2|UART_MCR_RTS);
-		if (rs->ier & UART_IER_THRI) {
-			rs->ier &= ~UART_IER_THRI;
-			serial_out(rs, OMAP3_IER, rs->ier);
-		}
+        unsigned int lcr;
+		lcr = UART011_CR_RXE | UART011_CR_TXE;
+		serial_out(rs, UART011_CR, lcr);
+		serial_out(rs, UART011_IMSC, (UART011_RTIM | UART011_RXIM));
 	}
 	return 0;	/* dummy */
 }
@@ -732,23 +669,27 @@ rs232_handler(struct rs232 *rs)
 /* Handle interrupt of a UART port */
 	unsigned int iir, lsr;
 
-	iir = serial_in(rs, OMAP3_IIR);
-	if (iir & UART_IIR_NO_INT)	/* No interrupt */
-		return;
-
-	lsr = serial_in(rs, OMAP3_LSR);
-	if (iir & UART_IIR_RDI) {	/* Data ready interrupt */
-		if (lsr & UART_LSR_DR)  {
-			read_chars(rs, lsr);
-		}
-	}
-	check_modem_status(rs);
-	if (iir & UART_IIR_THRI) {
-		if (lsr & UART_LSR_THRE) {
-			/* Ready to send and space available */
-			write_chars(rs);
-		}
-	}
+    iir = serial_in(rs, UART011_MIS);
+    if ( iir )
+    {
+        do
+        {
+            serial_out(rs, UART011_ICR, (iir & ~(UART011_TXIS|UART011_RTIS|UART011_RXIS)));
+            if ( iir & (UART011_RTIS|UART011_RXIS))
+            {
+                read_chars(rs, 0);
+            }
+            if ( iir & (UART011_DSRMIS|UART011_DCDMIS|UART011_CTSMIS|UART011_RIMIS))
+            {
+                check_modem_status(rs);
+            }
+            if ( iir & (UART011_TXIS))
+            {
+                write_chars(rs);
+            }
+            iir = serial_in(rs, UART011_MIS);
+        } while ( iir != 0 );
+    }
 }
 
 static void
@@ -756,13 +697,13 @@ read_chars(rs232_t *rs, unsigned int status)
 {
 	unsigned char c;
 
-	if(serial_in(rs,OMAP3_LSR) & OMAP3_LSR_RXOE) {
-		rs->rx_overrun_events++;
-	}
-
 	/* check the line status to know if there are more chars */
-	while (serial_in(rs, OMAP3_LSR) &  UART_LSR_DR) {
-		c = serial_in(rs, OMAP3_RHR);
+	while ( (serial_in(rs, UART011_FR) &  UART011_FR_RXFE) == 0 ) {
+		c = serial_in(rs, UART011_DR);
+        if ( c & UART011_DR_OE )
+        {
+            rs->rx_overrun_events++;
+        }
 		if (!(rs->ostate & ORAW)) {
 			if (c == rs->oxoff) {
 				rs->ostate &= ~OSWREADY;
@@ -801,23 +742,23 @@ write_chars(rs232_t *rs)
 
 	if (rs->ostate >= (ODEVREADY | OQUEUED | OSWREADY)) {
 		/* Bit test allows ORAW and requires the others. */
-		serial_out(rs, OMAP3_THR, *rs->otail);
+		serial_out(rs, UART011_DR, *rs->otail);
 		if (++rs->otail == bufend(rs->obuf))
 			rs->otail = rs->obuf;
 		if (--rs->ocount == 0) {
 			/* Turn on ODONE flag, turn off OQUEUED */
 			rs->ostate ^= (ODONE | OQUEUED); 
 			rs->tty->tty_events = 1;
-			if (rs->ier & UART_IER_THRI) {
-				rs->ier &= ~UART_IER_THRI;
-				serial_out(rs, OMAP3_IER, rs->ier);
+			if (rs->im & UART011_TXIM) {
+				rs->im &= ~UART011_TXIM;
+				serial_out(rs, UART011_IMSC, rs->im);
 			}
 		} else  {
 			if (rs->icount == RS_OLOWWATER)
 				rs->tty->tty_events = 1;
-			if (!(rs->ier & UART_IER_THRI)) {
-				rs->ier |= UART_IER_THRI;
-				serial_out(rs, OMAP3_IER, rs->ier);
+			if (!(rs->im & UART011_TXIM)) {
+				rs->im |= UART011_TXIM;
+				serial_out(rs, UART011_IMSC, rs->im);
 			}
 		}
 	}
@@ -830,8 +771,8 @@ check_modem_status(rs232_t *rs)
 
 	unsigned int msr;
 
-	msr = serial_in(rs, OMAP3_MSR); /* Resets modem interrupt */
-	if ((msr & (UART_MSR_DCD|UART_MSR_DDCD)) == UART_MSR_DDCD) {
+	msr = serial_in(rs, UART011_FR); /* Resets modem interrupt */
+	if ((msr & (UART011_FR_DCD|UART011_FR_DSR)) == UART011_FR_DSR) {
 		rs->ostate |= ODEVHUP;
 		rs->tty->tty_events = 1;
 	}

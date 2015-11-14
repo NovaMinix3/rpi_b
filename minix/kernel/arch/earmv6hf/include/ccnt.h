@@ -6,6 +6,7 @@
 #define PMU_PMCNTENSET_C	(1 << 31)  /* Enable PMCCNTR cycle counter */
 
 /* ARM ARM B4.1.117 PMCR */
+#define PMU_PMCR_CCR		(1 << 10)
 #define PMU_PMCR_DP		(1 << 5) /* Disable when ev. cnt. prohibited */
 #define PMU_PMCR_X		(1 << 4) /* Export enable */
 #define PMU_PMCR_D		(1 << 3) /* Clock divider */

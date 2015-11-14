@@ -24,7 +24,7 @@ MKPIC=		no # Never used as a dynamic library
 LIBSADIR=	${NETBSDSRCDIR}/sys/lib/libsa
 LIBSYSDIR=	${NETBSDSRCDIR}/minix/lib/libsys
 LIBMINIXCDIR=	${NETBSDSRCDIR}/minix/lib/libc
-LIBMINIXCARCHDIR= ${NETBSDSRCDIR}/minix/lib/libc/arch/${MACHINE_CPU}
+LIBMINIXCARCHDIR= ${NETBSDSRCDIR}/minix/lib/libc/arch/${MACHINE_ARCH}
 LIBCDIR=	${NETBSDSRCDIR}/lib/libc
 LIBCARCHDIR=	${LIBCDIR}/arch/${MACHINE_CPU}
 LIBCOMMONCDIR=	${NETBSDSRCDIR}/common/lib/libc
@@ -300,7 +300,7 @@ CLEANFILES+= ${f:C/\.o/.bc/}
 .endif # ${USE_BITCODE:Uno} == "yes"
 .endfor
 
-ARCHSUBDIR=${MACHINE_CPU}
-.include "${NETBSDSRCDIR}/minix/lib/libc/arch/${MACHINE_CPU}/Makefile.inc"
+ARCHSUBDIR=${MACHINE_ARCH}
+.include "${NETBSDSRCDIR}/minix/lib/libc/arch/${MACHINE_ARCH}/Makefile.inc"
 
 .include <bsd.lib.mk>

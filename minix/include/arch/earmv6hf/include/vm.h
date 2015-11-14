@@ -178,6 +178,10 @@ arm/vm.h
 #define ARM_TTBR_ADDR_MASK (0xffffc000) /* only the 18 upper bits are to be used as address */
 #define ARM_TTBR_FLAGS_CACHED ARM_TTBR_OUTER_WBWA
 
+#define ARM_PMCCTL_E (1<<0)
+#define ARM_PMCCTL_P (1<<1)
+#define ARM_PMCCTL_C (1<<2)
+
 /* Fault status */
 #define ARM_VM_PFE_FS(s) \
     ((((s) & ARM_VM_PFE_FS4) >> 6) | ((s) & ARM_VM_PFE_FS3_0))

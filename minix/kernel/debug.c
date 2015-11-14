@@ -497,7 +497,7 @@ static void statmsg(message *msg, struct proc *srcp, struct proc *dstp)
 	static int lastprint;
 
 	/* Stat message. */
-	assert(src);
+	assert(srcp);
 	proc2slot(srcp, src);
 	proc2slot(dstp, dst);
 	messages[src][dst]++;

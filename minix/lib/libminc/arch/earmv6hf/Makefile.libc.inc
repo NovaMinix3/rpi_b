@@ -93,7 +93,7 @@ CLEANFILES+= ${f}
 .endfor
 
 .if defined(HAVE_GCC) && ${HAVE_GCC} >= 45
-.if (${MACHINE_CPU} == "arm")
+.if (${MACHINE_ARCH} == "earmv6hf")
 COPTS.softfloat.c+=	-Wno-enum-compare -fno-tree-vrp
 .endif
 .endif

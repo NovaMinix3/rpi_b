@@ -216,3 +216,8 @@ void __switch_address_space(struct proc *p, struct proc **__ptproc)
 
 	return;
 }
+
+void announce_by_arch(void)
+{
+
+}

@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include <minix/sys_config.h>
-
+#include "direct_utils.h"
 #define ARE_PANICING 0xDEADC0FF
 
 /*===========================================================================*
@@ -22,6 +22,7 @@
 void panic(const char *fmt, ...)
 {
   va_list arg;
+
   /* The system has run aground of a fatal kernel error. Terminate execution. */
   if (kinfo.minix_panicing == ARE_PANICING) {
   	reset();

@@ -6,7 +6,7 @@ HERE=${.CURDIR}/arch/${MACHINE_ARCH}
 
 # objects we want unpaged from -lc
 MINLIB_OBJS_UNPAGED= get_bp.o
-get_bp.o:	${NETBSDSRCDIR}/minix/lib/libc/arch/arm/get_bp.S 
+get_bp.o:	${NETBSDSRCDIR}/minix/lib/libc/arch/${MACHINE_ARCH}/get_bp.S 
 
 # objects we want unpaged from -lsys
 SYS_OBJS_UNPAGED=assert.o stacktrace.o
