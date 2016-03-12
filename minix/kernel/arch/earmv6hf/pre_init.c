@@ -17,6 +17,7 @@
 #include "bsp_serial.h"
 #include "glo.h"
 #include <machine/multiboot.h>
+#include "atags.h"
 
 #if USE_SYSDEBUG
 #define MULTIBOOT_VERBOSE 1
@@ -187,6 +188,41 @@ int overlaps(multiboot_module_t *mod, int n, int cmp_mod)
 multiboot_module_t mb_modlist[MB_MODS_NR];
 multiboot_memory_map_t mb_memmap;
 
+#define	ATAG_START	0x00000100 /* physical memory address */
+
+static void probe_atags(void)
+{
+struct atag *tp;
+int done = 0;
+
+	tp = (struct atag *) ATAG_START;
+	if (tp->hdr.tag == ATAG_CORE) {
+		while (!done) {
+			tp = tag_next(tp);
+			switch (tp->hdr.tag) {
+			case ATAG_MEM:
+				mb_memmap.mm_length = tp->u.mem.size;
+				mb_memmap.mm_base_addr = tp->u.mem.start;
+				break;
+			case ATAG_CMDLINE:
+			case ATAG_VIDEOTEXT:
+			case ATAG_RAMDISK:
+			case ATAG_INITRD2:
+			case ATAG_SERIAL:
+			case ATAG_REVISION:
+			case ATAG_VIDEOLFB:
+				break;
+			case ATAG_NONE:
+				done = 1;
+				break;
+			default:
+				done = 1;
+				break;
+			}
+		}     
+	}
+}
+
 void setup_mbi(multiboot_info_t *mbi, char *bootargs)
 {
 	memset(mbi, 0, sizeof(*mbi));
@@ -213,6 +249,7 @@ void setup_mbi(multiboot_info_t *mbi, char *bootargs)
 	mb_memmap.mm_base_addr = MB_MMAP_START;
 	mb_memmap.mm_length  = MB_MMAP_SIZE;
 	mb_memmap.type = MULTIBOOT_MEMORY_AVAILABLE;
+	probe_atags();
 }
 
 void get_parameters(kinfo_t *cbi, char *bootargs)

@@ -15,6 +15,11 @@
 
 #define NR_BANKS 3
 
+#define isb() __asm__ __volatile__ ("mcr p15, 0, %0, c7,  c5, 4" : : "r" (0) : "memory")
+#define dmb() __asm__ __volatile__ ("mcr p15, 0, %0, c7, c10, 5" : : "r" (0) : "memory")
+#define dsb() __asm__ __volatile__ ("mcr p15, 0, %0, c7, c10, 4" : : "r" (0) : "memory")
+#define barrier() dsb(); isb()
+
 static struct rpi_intr
 {
     vir_bytes base;
@@ -51,6 +56,8 @@ void check_irq_pending(u32_t irq_num)
 {
     u32_t handle = FALSE;
 
+    barrier();
+
     /* Check the appropriate hardware register, depending on the IRQ number.  */
     if ( irq_num >= 0x40 )
     {
@@ -83,6 +90,8 @@ void check_irq_pending(u32_t irq_num)
          * the handler function.  As far as we can tell, it cannot be cleared
          * directly through the interrupt controller.  */
     }
+
+    dmb();
 }
 
 /*
@@ -104,6 +113,8 @@ void bsp_irq_handle(void)
 {
     u32_t bank;
 
+    barrier();
+
     for ( bank = 0; bank < NR_BANKS; bank++ )
     {
         u32_t mask = bcm2835_enabled_irqs[bank];
@@ -118,6 +129,8 @@ void bsp_irq_handle(void)
 
 void bsp_irq_unmask(int irq)
 {
+    dmb();
+
     if ( irq < 0x20 ) //gpu0: 0-31
     {
         mmio_write( rpi_intr.base + RPI_INTCPS_MIR_CLEAR0, ( 1 << irq ) );
@@ -133,10 +146,14 @@ void bsp_irq_unmask(int irq)
         mmio_write( rpi_intr.base + RPI_INTCPS_MIR_CLEAR_BASIC, ( 1 << ( irq - 0x40 ) ) );
         bcm2835_enabled_irqs[2] |= ( 1 << ( irq - 0x40 ) );
     }
+
+    barrier();
 }
 
 void bsp_irq_mask(const int irq)
 {
+    dmb();
+
     if ( irq < 0x20 )
     {
         mmio_write( ( rpi_intr.base + RPI_INTCPS_MIR_SET0 ), ( 1 << irq ) );
@@ -152,5 +169,7 @@ void bsp_irq_mask(const int irq)
         mmio_write( ( rpi_intr.base + RPI_INTCPS_MIR_SET_BASIC ), ( 1 << ( irq - 0x40 ) ) );
         bcm2835_enabled_irqs[2] &= ~( 1 << ( irq - 0x40 ) );
     }
+
+    barrier();
 }
 

@@ -3,7 +3,7 @@
 
 #define RPI_UART_BASE 0x20201000 /* UART1 physical address */
 
-#define UART011_FR_TXFF         0x020   /* Transmit-hold-register empty */
+#define UART011_FR_TXFE         0x080   /* Transmit-hold-register empty */
 #define UART011_FR_RXFE         0x010
 #define RPI_UART_MSR_CTS        0x10    /* Current Clear to Send */
 

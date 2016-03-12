@@ -153,7 +153,7 @@ static inline void dcache_maint(int type){
         if (type == 1) 
 	{
 		// invalidate caches
-		asm volatile ("mcr p15, 0, %0, c7, c7,  0" :: "r" (0) : "memory");
+		asm volatile ("mcr p15, 0, %0, c7, c14,  0" :: "r" (0) : "memory");
 		//invalidate tlb
 		asm volatile ("mcr p15, 0, %0, c8, c7,  0" :: "r" (0) : "memory"); 
 		//mcr p15,0,r2,c8,c7,0 ;@ invalidate tlb

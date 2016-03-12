@@ -151,7 +151,8 @@ irq_entry_from_user:
 
 	add	sp, sp, #4
 	pop	{fp}				/* caller proc ptr. */
-	dsb					/* data synchronization barrier. */
+	mov	r0, #0
+	mcr	p15, 0, r0, c7, c10, 4		/* dsb */
 
 	b	_C_LABEL(switch_to_user)
 
@@ -162,7 +163,8 @@ irq_entry_from_kernel:
 	/* call handler */
 	bl	_C_LABEL(bsp_irq_handle)	/* bsp_irq_handle(void). */
 
-	/* data synchronization barrier */ dsb 
+	mov	r0, #0
+	mcr	p15, 0, r0, c7, c10, 4		/* dsb */
 	pop	{r0-r12, lr}
 	rfeia	sp!
 

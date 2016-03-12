@@ -101,7 +101,7 @@ static phys_bytes createpde(
 		pdeval = pr->p_seg.p_ttbr_v[ARM_VM_PDE(linaddr)];
 	} else {
 		/* Requested address is physical. Make up the PDE entry. */
-		assert (linaddr >= PHYS_MEM_BEGIN && linaddr <= PHYS_MEM_END);
+		assert (linaddr >= PHYS_MEM_BEGIN && linaddr < kinfo.mem_high_phys );
 
 		/* memory */
 		pdeval = (linaddr & ARM_VM_SECTION_MASK)

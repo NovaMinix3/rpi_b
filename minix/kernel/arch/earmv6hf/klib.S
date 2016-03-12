@@ -96,12 +96,14 @@ ENTRY(__user_copy_msg_pointer_failure)
 
 ENTRY(intr_enable)
 ENTRY(interrupts_enable)
-	dsb
+	mov	r0, #0
+	mcr	p15, 0, r0, c7, c10, 4       /* dsb */
 	cpsie if
 	bx lr
 
 ENTRY(intr_disable)
 ENTRY(interrupts_disable)
-	dsb
+	mov	r0, #0
+	mcr	p15, 0, r0, c7, c10, 4       /* dsb */
 	cpsid if
 	bx lr

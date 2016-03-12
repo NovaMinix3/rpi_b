@@ -173,7 +173,7 @@ void pg_identity(kinfo_t *cbi)
 
 		phys = i * ARM_SECTION_SIZE;
 		/* mark mormal memory as cacheable. TODO: fix hard coded values */
-		if (phys >= PHYS_MEM_BEGIN && phys <= PHYS_MEM_END) {
+		if (phys >= PHYS_MEM_BEGIN && phys < cbi->mem_high_phys) {
 			pagedir[i] =  phys | flags | ARM_VM_SECTION_CACHED;
 		} else {
 			pagedir[i] =  phys | flags | ARM_VM_SECTION_DEVICE;

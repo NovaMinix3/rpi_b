@@ -20,6 +20,7 @@ static irq_hook_t rpi_timer_hook;
 static u32_t counts_per_hz = ~0;
 static u64_t high_frc;
 
+static int rpi_timer_init_ok = 0;
 struct rpi_timer_registers;
 
 struct bcm2835_timer
@@ -31,14 +32,18 @@ struct bcm2835_timer
 
 struct rpi_timer_registers
 {
+	vir_bytes STCS;
 	vir_bytes STCLO;
+	vir_bytes STCHI;
 	vir_bytes STC3;
 };
 
 static struct rpi_timer_registers regs_v1 = 
 {
+	.STCS = BCM2835_STIMER_CS,
 	.STCLO = BCM2835_STIMER_CLO,
-	.STC3 =  BCM2835_STIMER_C3,
+	.STCHI = BCM2835_STIMER_CHI,
+	.STC3 =  BCM2835_STIMER_C3
 };
 static struct bcm2835_timer rpi_timer = {
 	.base = BCM2835_STIMER_BASE,
@@ -75,10 +80,12 @@ bsp_timer_init(unsigned freq)
 		kern_phys_map_ptr(timer->base, ARM_PAGE_SIZE,
 		    VMMF_UNCACHED | VMMF_WRITE,
 		    &timer_phys_map, (vir_bytes) & timer->base);
+		mmio_write( timer->base + timer->regs->STCS, BCM2835_STIMER_M3 );
 		stclo = mmio_read( timer->base + timer->regs->STCLO );
 		stclo += counts_per_hz;
 		mmio_write( timer->base + timer->regs->STC3, stclo );
 		frclock_init();
+		rpi_timer_init_ok = 1;
 	}
 }
 
@@ -92,8 +99,22 @@ void
 bsp_timer_int_handler()
 {
 	u32_t stclo;
+        mmio_write( timer->base + timer->regs->STCS , BCM2835_STIMER_M3 );
 	stclo = mmio_read( timer->base + timer->regs->STCLO );
 	stclo += counts_per_hz;
 	mmio_write( timer->base + timer->regs->STC3, stclo );
+}
+
+void
+read_tsc_64(u64_t* t)
+{
+	u32_t stclo, stchi;
+	if (rpi_timer_init_ok) {
+		stclo = mmio_read( timer->base + timer->regs->STCLO );
+		stchi = mmio_read( timer->base + timer->regs->STCHI );
+		*t = ((u64_t)stchi << 32) | (u64_t)stclo;
+	} else {
+		*t = (u64_t) 0;
+	}
 }
 

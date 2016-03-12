@@ -53,13 +53,13 @@
 #define istop(rs) \
 	(serial_out((rs), UART011_CR, UART011_CR_OUT2|UART011_CR_DTR), \
 		(rs)->idevready = FALSE)
-/* Macro to tell if device is ready.  The rs->cts field is set to UART_MSR_CTS
+/* Macro to tell if device is ready.  The rs->cts field is set to UART011_FR_CTS
  * if CLOCAL is in effect for a line without a CTS wire.
  */
-#define devready(rs) ((serial_in(rs, UART011_FR) | rs->cts) & UART011_FR_CTS)
+#define devready(rs) (((serial_in(rs, UART011_FR) | rs->cts) & UART011_FR_CTS) ? ODEVREADY : 0)
 
 /* Macro to tell if transmitter is ready. */
-#define txready(rs) (serial_in(rs, UART011_FR) & UART011_FR_TXFF)
+#define txready(rs) (serial_in(rs, UART011_FR) & UART011_FR_TXFE)
 
 /* RS232 device structure, one per device. */
 typedef struct rs232 {
@@ -119,7 +119,7 @@ typedef struct uart_port {
 } uart_port_t;
 
 static uart_port_t rpi_ports[] = {
-  {  RPI_UART_BASE , 72 },	/* UART0 */
+  {  RPI_UART_BASE , 57 },	/* UART0 */
   { 0, 0 },
   { 0, 0 },
   { 0, 0 }
